@@ -20,6 +20,8 @@ public class Account {
     private boolean primeMember;
     @Column(name = "Email")
     private String email;
+    @Transient
+    private String token;
 
     public Account constructEntity(String firstName, String lastName, String password, boolean primeMember, String email) {
         Account account = new Account();
@@ -85,4 +87,11 @@ public class Account {
         this.primeMember = primeMember;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 }
