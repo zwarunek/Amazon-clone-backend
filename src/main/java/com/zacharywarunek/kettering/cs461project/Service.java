@@ -1,15 +1,22 @@
 package com.zacharywarunek.kettering.cs461project;
 
 import com.zacharywarunek.kettering.cs461project.entitys.Account;
-import com.zacharywarunek.kettering.cs461project.entitys.AuthRequest;
+import com.zacharywarunek.kettering.cs461project.entitys.Product;
+import com.zacharywarunek.kettering.cs461project.repositories.ICategoryRepo;
+import com.zacharywarunek.kettering.cs461project.repositories.IProductImagesRepo;
+import com.zacharywarunek.kettering.cs461project.repositories.IProductRepo;
+import com.zacharywarunek.kettering.cs461project.util.AuthRequest;
 import com.zacharywarunek.kettering.cs461project.repositories.IAccountRepo;
-import com.zacharywarunek.kettering.cs461project.util.JwtUtil;
+import com.zacharywarunek.kettering.cs461project.service.CustomUserDetailsService;
+import com.zacharywarunek.kettering.cs461project.config.JwtUtil;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 
 @Component
 public class Service {
@@ -18,7 +25,19 @@ public class Service {
     IAccountRepo accountRepo;
 
     @Autowired
+    ICategoryRepo categoryRepo;
+
+    @Autowired
+    IProductImagesRepo productImagesRepo;
+
+    @Autowired
+    IProductRepo productRepo;
+
+    @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
 
     public ResponseObject Register(String payloadFromUI){
         ResponseObject response = new ResponseObject();
@@ -47,7 +66,8 @@ public class Service {
 
             account = accountRepo.fetchAccountByEmail(payloadFromUI.getEmail());
             if(account != null && checkPassword(payloadFromUI.getPassword(), account.getPassword())){
-                account.setToken(jwtUtil.generateToken(payloadFromUI.getEmail()));
+                UserDetails userdetails = userDetailsService.loadUserByUsername(payloadFromUI.getEmail());
+                account.setToken(jwtUtil.generateToken(userdetails));
                 response.setStatus(200);
                 response.setMessage("You are now logged in");
                 response.setData(account);
@@ -82,4 +102,65 @@ public class Service {
         return(password_verified);
     }
 
+    public ResponseObject getProduct(int productId) {
+        ResponseObject response = new ResponseObject();
+        Product product = productRepo.fetchProductById(productId);
+        if(product != null){
+            response.setStatus(200);
+            response.setMessage("Product was found by productId");
+            response.setData(product);
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("Product was not found with that Product Id");
+        }
+        return response;
+
+    }
+    public ResponseObject getProductImages(int productId) {
+        ResponseObject response = new ResponseObject();
+        Collection<String> productImages = productImagesRepo.fetchProductImagesById(productId);
+        if(productImages != null && !productImages.isEmpty()){
+            response.setStatus(200);
+            response.setMessage("Product Images were found by productId");
+            response.setData(productImages);
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("Product Images were not found with that Product Id");
+        }
+        return response;
+
+    }
+
+    public ResponseObject getAllProducts() {
+        ResponseObject response = new ResponseObject();
+        Collection<Product> products = productRepo.fetchAllProducts();
+        if(products != null){
+            response.setStatus(200);
+            response.setMessage("Products were found");
+            response.setData(products);
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("No products were found");
+        }
+        return response;
+
+    }
+    public ResponseObject searchProducts(String search) {
+        ResponseObject response = new ResponseObject();
+        Collection<Product> products = productRepo.searchProducts(search);
+        if(products != null){
+            response.setStatus(200);
+            response.setMessage("Products were found");
+            response.setData(products);
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("No products were found");
+        }
+        return response;
+
+    }
 }

@@ -1,4 +1,4 @@
-package com.zacharywarunek.kettering.cs461project.entitys;
+package com.zacharywarunek.kettering.cs461project.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

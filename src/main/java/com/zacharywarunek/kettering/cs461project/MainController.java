@@ -1,19 +1,21 @@
 package com.zacharywarunek.kettering.cs461project;
 
-import com.zacharywarunek.kettering.cs461project.entitys.AuthRequest;
-import com.zacharywarunek.kettering.cs461project.util.JwtUtil;
+import com.zacharywarunek.kettering.cs461project.util.AuthRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://loaclhost:4200", allowedHeaders = "*")
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 public class MainController {
 
     @Autowired
     private Service service;
 
+
+    @GetMapping("/")
+    public String welcome() {
+        return "Welcome to Amazon";
+    }
 
     @RequestMapping(value = "/apiTest", method = RequestMethod.GET)
     public ResponseObject apiTest(){
@@ -30,14 +32,30 @@ public class MainController {
         return response;
     }
 
-    @GetMapping("/")
-    public String welcome() {
-        return "Welcome to Amazon";
-    }
-
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseObject login(@RequestBody AuthRequest payloadFromUI) throws Exception {
         ResponseObject response = service.Authenticate(payloadFromUI);
+        return response;
+    }
+
+    @RequestMapping(value = "/getProduct", method = RequestMethod.GET)
+    public ResponseObject getProduct(@RequestParam int productId){
+        ResponseObject response = service.getProduct(productId);
+        return response;
+    }
+    @RequestMapping(value = "/getAllProducts", method = RequestMethod.GET)
+    public ResponseObject getAllProducts(){
+        ResponseObject response = service.getAllProducts();
+        return response;
+    }
+    @RequestMapping(value = "/searchProducts", method = RequestMethod.GET)
+    public ResponseObject getAllProducts(@RequestParam String search){
+        ResponseObject response = service.searchProducts(search);
+        return response;
+    }
+    @RequestMapping(value = "/getProductImages", method = RequestMethod.GET)
+    public ResponseObject getProductImages(@RequestParam int productId){
+        ResponseObject response = service.getProductImages(productId);
         return response;
     }
 }
