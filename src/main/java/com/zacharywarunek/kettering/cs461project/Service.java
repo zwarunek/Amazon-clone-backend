@@ -1,6 +1,7 @@
 package com.zacharywarunek.kettering.cs461project;
 
 import com.zacharywarunek.kettering.cs461project.entitys.Account;
+import com.zacharywarunek.kettering.cs461project.entitys.Category;
 import com.zacharywarunek.kettering.cs461project.entitys.Product;
 import com.zacharywarunek.kettering.cs461project.repositories.ICategoryRepo;
 import com.zacharywarunek.kettering.cs461project.repositories.IProductImagesRepo;
@@ -160,6 +161,30 @@ public class Service {
             response.setStatus(404);
             response.setMessage("No products were found");
         }
+        return response;
+
+    }
+
+    public ResponseObject getAllCategories() {
+        ResponseObject response = new ResponseObject();
+        Collection<Category> categories = categoryRepo.fetchAllCategories();
+        if(categories != null){
+            response.setStatus(200);
+            response.setMessage("Products were found");
+            response.setData(categories);
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("No products were found");
+        }
+        return response;
+    }
+
+    public ResponseObject checkAccountExists(String email) {
+        ResponseObject response = new ResponseObject();
+        boolean exists = accountRepo.checkIfExists(email);
+        response.setStatus(200);
+        response.setData(exists);
         return response;
 
     }

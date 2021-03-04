@@ -11,5 +11,5 @@ import java.util.Collection;
 public interface ICategoryRepo extends IJPABaseRepo<Category, String> {
 
     @Query(value = "SELECT * FROM Category", nativeQuery = true)
-    Collection<Category> fetchAllProducts();
+    Collection<Category> fetchAllCategories();
 }

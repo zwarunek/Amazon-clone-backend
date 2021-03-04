@@ -37,6 +37,11 @@ public class MainController {
         ResponseObject response = service.Authenticate(payloadFromUI);
         return response;
     }
+    @RequestMapping(value = "/checkAccountExists", method = RequestMethod.GET)
+    public ResponseObject checkAccountExists(@RequestParam String email){
+        ResponseObject response = service.checkAccountExists(email);
+        return response;
+    }
 
     @RequestMapping(value = "/getProduct", method = RequestMethod.GET)
     public ResponseObject getProduct(@RequestParam int productId){
@@ -56,6 +61,11 @@ public class MainController {
     @RequestMapping(value = "/getProductImages", method = RequestMethod.GET)
     public ResponseObject getProductImages(@RequestParam int productId){
         ResponseObject response = service.getProductImages(productId);
+        return response;
+    }
+    @RequestMapping(value = "/getAllCategories", method = RequestMethod.GET)
+    public ResponseObject getAllCategories(){
+        ResponseObject response = service.getAllCategories();
         return response;
     }
 }
