@@ -1,6 +1,7 @@
 package com.zacharywarunek.kettering.cs461project;
 
 import com.zacharywarunek.kettering.cs461project.util.AuthRequest;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,6 +67,12 @@ public class MainController {
     @RequestMapping(value = "/getAllCategories", method = RequestMethod.GET)
     public ResponseObject getAllCategories(){
         ResponseObject response = service.getAllCategories();
+        return response;
+    }
+    @RequestMapping(value = "/changePrimeMembership", method = RequestMethod.POST)
+    public ResponseObject getAllCategories(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.changePrimeMembership(!jsonPayload.getBoolean("member"), jsonPayload.getInt("accountId"));
         return response;
     }
 }

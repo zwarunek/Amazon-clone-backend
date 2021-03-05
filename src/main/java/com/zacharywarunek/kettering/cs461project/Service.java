@@ -188,4 +188,12 @@ public class Service {
         return response;
 
     }
+
+    public ResponseObject changePrimeMembership(boolean member, int accountId) {
+        ResponseObject response = new ResponseObject();
+        accountRepo.changePrimeMembership(member, accountId);
+        response.setStatus(200);
+        response.setData(accountRepo.fetchAccountByAccountId(accountId));
+        return response;
+    }
 }
