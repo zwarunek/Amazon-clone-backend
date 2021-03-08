@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.zacharywarunek.kettering</groupId>
-    <artifactId>cs461-project</artifactId>
+    <artifactId>cs461-project-back</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>cs461-project</name>
-    <description>Demo project for Spring Boot</description>
+    <name>cs461-project-back</name>
+    <description>Backend Server for CS461 Main Project</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
@@ -71,7 +71,6 @@
             <artifactId>hibernate-core</artifactId>
             <version>5.3.6.Final</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -96,5 +95,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

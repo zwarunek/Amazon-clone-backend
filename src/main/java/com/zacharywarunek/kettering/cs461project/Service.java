@@ -85,7 +85,7 @@ public class Service {
         }
         return response;
     }
-    private String hashPassword(String password) throws NoSuchAlgorithmException {
+    private String hashPassword(String password) {
         int workload = 12;
         String salt = BCrypt.gensalt(workload);
         String hashed_password = BCrypt.hashpw(password, salt);
