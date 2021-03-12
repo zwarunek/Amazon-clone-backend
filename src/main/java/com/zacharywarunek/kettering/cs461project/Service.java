@@ -196,4 +196,47 @@ public class Service {
         response.setData(accountRepo.fetchAccountByAccountId(accountId));
         return response;
     }
+    public ResponseObject changeAccountDetails(JSONObject jsonPayload){
+        ResponseObject response = new ResponseObject();
+        boolean updatePassword = jsonPayload.getBoolean("updatePassword");
+        String password = updatePassword?hashPassword(jsonPayload.getString("password")): jsonPayload.getString("password");
+        Account account = new Account();
+        try {
+
+            account = account.constructEntity(jsonPayload.getString("firstName"), jsonPayload.getString("lastName"),password,jsonPayload.getBoolean("primeMember"),jsonPayload.getString("email"));
+            account.setAccountId(jsonPayload.getInt("accountId"));
+            accountRepo.save(account);
+            account.setToken(jsonPayload.getString("token"));
+            response.setStatus(200);
+            response.setMessage("Account has been updated");
+            response.setData(account);
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when updating your account");
+            response.setData("An error occurred when updating an account :  " + e.getMessage());
+        }
+        return response;
+    }
+
+    public ResponseObject checkPassword(AuthRequest payloadFromUI) {
+        ResponseObject response = new ResponseObject();
+        Account account;
+        try {
+
+            account = accountRepo.fetchAccountByEmail(payloadFromUI.getEmail());
+            if(account != null && checkPassword(payloadFromUI.getPassword(), account.getPassword())){
+                response.setStatus(200);
+            }
+            else{
+                response.setStatus(403);
+                response.setMessage("Current password was incorrect");
+            }
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when authenticating your password");
+        }
+        return response;
+    }
 }

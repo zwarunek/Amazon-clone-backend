@@ -75,4 +75,16 @@ public class MainController {
         ResponseObject response = service.changePrimeMembership(!jsonPayload.getBoolean("member"), jsonPayload.getInt("accountId"));
         return response;
     }
+    @RequestMapping(value = "/changeAccountDetails", method = RequestMethod.POST)
+    public ResponseObject changeAccountDetails(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.changeAccountDetails(jsonPayload);
+        return response;
+    }
+
+    @RequestMapping(value = "/checkPassword", method = RequestMethod.POST)
+    public ResponseObject checkPassword(@RequestBody AuthRequest payloadFromUI){
+        ResponseObject response = service.checkPassword(payloadFromUI);
+        return response;
+    }
 }
