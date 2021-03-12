@@ -3,20 +3,21 @@ package com.zacharywarunek.kettering.cs461project;
 import com.zacharywarunek.kettering.cs461project.entitys.Account;
 import com.zacharywarunek.kettering.cs461project.entitys.Category;
 import com.zacharywarunek.kettering.cs461project.entitys.Product;
-import com.zacharywarunek.kettering.cs461project.repositories.ICategoryRepo;
-import com.zacharywarunek.kettering.cs461project.repositories.IProductImagesRepo;
-import com.zacharywarunek.kettering.cs461project.repositories.IProductRepo;
+import com.zacharywarunek.kettering.cs461project.repositories.*;
 import com.zacharywarunek.kettering.cs461project.util.AuthRequest;
-import com.zacharywarunek.kettering.cs461project.repositories.IAccountRepo;
 import com.zacharywarunek.kettering.cs461project.service.CustomUserDetailsService;
 import com.zacharywarunek.kettering.cs461project.config.JwtUtil;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
 import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
@@ -35,7 +36,16 @@ public class Service {
     IProductRepo productRepo;
 
     @Autowired
+    IPaymentTypeRepo paymentTypeRepo;
+
+    @Autowired
+    IPaymentMethodRepo iPaymentMethodRepo;
+
+    @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -237,6 +247,50 @@ public class Service {
             response.setStatus(411);
             response.setMessage("An error occurred when authenticating your password");
         }
+        return response;
+    }
+
+    public ResponseObject getAllPaymentMethods(int accountId) {
+        ResponseObject response = new ResponseObject();
+        String query = "SELECT pt.imageSrc, pt.TypeName, pm.NameOnCard, pm.CardNumber, pm.Cvv, pm.Exp, pm.Favorite, pm.PMID " +
+                "FROM PaymentType pt " +
+                "INNER JOIN PaymentMethod PM on pt.TypeId = PM.TypeId " +
+                "where AccountID = " + accountId +
+                " order by pm.Favorite DESC";
+        Collection<JSONObject> paymentMethods = jdbcTemplate.query(query, new RowMapper<JSONObject>() {
+            @Override
+            public JSONObject mapRow(ResultSet rs, int i) throws SQLException {
+                JSONObject json = new JSONObject();
+                json.put("image", rs.getString(1));
+                json.put("type", rs.getString(2));
+                json.put("nameOnCard", rs.getString(3));
+                json.put("cardNumber", rs.getString(4));
+                json.put("cvv", rs.getString(5));
+                json.put("exp", rs.getString(6));
+                json.put("favorite", rs.getBoolean(7));
+                json.put("PMID", rs.getInt(8));
+                return json;
+            }
+        });
+        if(!paymentMethods.isEmpty()){
+            response.setStatus(200);
+            response.setMessage("Payment methods were found");
+            response.setData(paymentMethods.toString());
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("No payment methods found");
+        }
+        return response;
+
+    }
+
+    public ResponseObject setPaymentMethodFavorite(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        String query = "update PaymentMethod set Favorite = 0 where AccountID = "+jsonPayload.getInt("accountId")+" and Favorite = 1;" +
+                " update PaymentMethod set Favorite = 1 where AccountID = "+jsonPayload.getInt("accountId")+" and PMID =  " + jsonPayload.getInt("PMID");
+        jdbcTemplate.update(query);
+        response.setStatus(200);
         return response;
     }
 }

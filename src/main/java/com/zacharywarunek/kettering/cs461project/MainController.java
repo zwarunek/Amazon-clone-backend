@@ -87,4 +87,16 @@ public class MainController {
         ResponseObject response = service.checkPassword(payloadFromUI);
         return response;
     }
+    @RequestMapping(value = "/getAllPaymentMethods", method = RequestMethod.GET)
+    public ResponseObject getAllPaymentMethods(@RequestParam int accountId){
+        ResponseObject response = service.getAllPaymentMethods(accountId);
+        return response;
+    }
+
+    @RequestMapping(value = "/setPaymentMethodFavorite", method = RequestMethod.POST)
+    public ResponseObject setPaymentMethodFavorite(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.setPaymentMethodFavorite(jsonPayload);
+        return response;
+    }
 }
