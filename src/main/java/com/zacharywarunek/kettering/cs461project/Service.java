@@ -1,8 +1,6 @@
 package com.zacharywarunek.kettering.cs461project;
 
-import com.zacharywarunek.kettering.cs461project.entitys.Account;
-import com.zacharywarunek.kettering.cs461project.entitys.Category;
-import com.zacharywarunek.kettering.cs461project.entitys.Product;
+import com.zacharywarunek.kettering.cs461project.entitys.*;
 import com.zacharywarunek.kettering.cs461project.repositories.*;
 import com.zacharywarunek.kettering.cs461project.util.AuthRequest;
 import com.zacharywarunek.kettering.cs461project.service.CustomUserDetailsService;
@@ -15,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
-import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -39,7 +36,7 @@ public class Service {
     IPaymentTypeRepo paymentTypeRepo;
 
     @Autowired
-    IPaymentMethodRepo iPaymentMethodRepo;
+    IPaymentMethodRepo paymentMethodRepo;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -250,6 +247,27 @@ public class Service {
         return response;
     }
 
+
+    public ResponseObject savePaymentMethod(JSONObject json){
+        ResponseObject response = new ResponseObject();
+        PaymentMethod paymentMethod = new PaymentMethod();
+        try {
+            paymentMethod = paymentMethod.constructEntity(json.getInt("accountId"), json.getInt("typeId"), json.getString("nameOnCard"), json.getString("cardNumber"), json.getString("exp"), json.getString("cvv"));
+            if(json.has("pmid"))
+                paymentMethod.setPmId(json.getInt("pmid"));
+
+            paymentMethodRepo.save(paymentMethod);
+            response.setStatus(200);
+            response.setMessage("Payment Method has been created");
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when creating payment method");
+
+        }
+        return response;
+    }
+
     public ResponseObject getAllPaymentMethods(int accountId) {
         ResponseObject response = new ResponseObject();
         String query = "SELECT pt.imageSrc, pt.TypeName, pm.NameOnCard, pm.CardNumber, pm.Cvv, pm.Exp, pm.Favorite, pm.PMID " +
@@ -292,5 +310,21 @@ public class Service {
         jdbcTemplate.update(query);
         response.setStatus(200);
         return response;
+    }
+
+    public ResponseObject getAllPaymentTypes() {
+        ResponseObject response = new ResponseObject();
+        Collection<PaymentType> paymentTypes = paymentTypeRepo.fetchAllPaymentTypes();
+        response.setStatus(200);
+        response.setData(paymentTypes);
+        return response;
+
+    }
+    public ResponseObject deletePaymentMethod(JSONObject json) {
+        ResponseObject response = new ResponseObject();
+        paymentMethodRepo.deleteById(json.getInt("pmid"));
+        response.setStatus(200);
+        return response;
+
     }
 }

@@ -1,5 +1,6 @@
 package com.zacharywarunek.kettering.cs461project;
 
+import com.zacharywarunek.kettering.cs461project.entitys.PaymentMethod;
 import com.zacharywarunek.kettering.cs461project.util.AuthRequest;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,12 @@ public class MainController {
         ResponseObject response = service.checkPassword(payloadFromUI);
         return response;
     }
+    @RequestMapping(value = "/savePaymentMethod", method = RequestMethod.POST)
+    public ResponseObject savePaymentMethod(@RequestBody String  payload){
+        JSONObject json = new JSONObject(payload);
+        ResponseObject response = service.savePaymentMethod(json.getJSONObject("paymentMethod"));
+        return response;
+    }
     @RequestMapping(value = "/getAllPaymentMethods", method = RequestMethod.GET)
     public ResponseObject getAllPaymentMethods(@RequestParam int accountId){
         ResponseObject response = service.getAllPaymentMethods(accountId);
@@ -94,9 +101,21 @@ public class MainController {
     }
 
     @RequestMapping(value = "/setPaymentMethodFavorite", method = RequestMethod.POST)
-    public ResponseObject setPaymentMethodFavorite(@RequestBody String payloadFromUI){
+    public ResponseObject savePaymentMethodFavorite(@RequestBody String payloadFromUI){
         JSONObject jsonPayload = new JSONObject(payloadFromUI);
         ResponseObject response = service.setPaymentMethodFavorite(jsonPayload);
+        return response;
+    }
+    @RequestMapping(value = "/getAllPaymentTypes", method = RequestMethod.GET)
+    public ResponseObject getAllPaymentTypes(){
+        ResponseObject response = service.getAllPaymentTypes();
+        return response;
+    }
+
+    @RequestMapping(value = "/deletePaymentMethod", method = RequestMethod.POST)
+    public ResponseObject deletePaymentMethod(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.deletePaymentMethod(jsonPayload);
         return response;
     }
 }

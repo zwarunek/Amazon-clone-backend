@@ -12,10 +12,13 @@ public class PaymentType {
     private int typeId;
     @Column(name = "TypeName")
     private String typeName;
+    @Column(name = "ImageSrc")
+    private String imageSrc;
 
-    public PaymentType constructEntity(String typeName) {
+    public PaymentType constructEntity(String typeName, String imageSrc) {
         PaymentType paymentType = new PaymentType();
         paymentType.setTypeName(typeName);
+        paymentType.setImageSrc(imageSrc);
         return paymentType;
     }
 
@@ -33,5 +36,13 @@ public class PaymentType {
 
     public void setTypeName(String name) {
         this.typeName = name;
+    }
+
+    public String getImageSrc() {
+        return imageSrc;
+    }
+
+    public void setImageSrc(String imageType) {
+        this.imageSrc = imageType;
     }
 }

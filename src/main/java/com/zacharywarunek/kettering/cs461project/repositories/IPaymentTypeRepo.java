@@ -1,5 +1,6 @@
 package com.zacharywarunek.kettering.cs461project.repositories;
 
+import com.zacharywarunek.kettering.cs461project.entitys.PaymentMethod;
 import com.zacharywarunek.kettering.cs461project.entitys.PaymentType;
 import com.zacharywarunek.kettering.cs461project.repositories.JPA.IJPABaseRepo;
 import org.springframework.data.jpa.repository.Query;

@@ -26,7 +26,7 @@ public class PaymentMethod {
     @Column(name = "Favorite")
     private boolean favorite;
 
-    public PaymentMethod constructEntity(int accountId, int typeId, String nameOnCard, String cardNumber, String exp, String cvv, boolean favorite) {
+    public PaymentMethod constructEntity(int accountId, int typeId, String nameOnCard, String cardNumber, String exp, String cvv) {
         PaymentMethod paymentMethod = new PaymentMethod();
         paymentMethod.setAccountId(accountId);
         paymentMethod.setTypeId(typeId);
@@ -34,7 +34,6 @@ public class PaymentMethod {
         paymentMethod.setCardNumber(cardNumber);
         paymentMethod.setExp(exp);
         paymentMethod.setCvv(cvv);
-        paymentMethod.setFavorite(favorite);
         return paymentMethod;
     }
 
