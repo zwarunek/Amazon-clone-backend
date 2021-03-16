@@ -20,7 +20,7 @@ public class ShoppingCart{
     @Column(name = "ProductListID") private  int productListID;
 
 
-    public Address constructEntity(int accountID, int shoppingCartID, double total, boolean primeEligible, int productListID) {
+    public ShoppingCart constructEntity(int accountID, int shoppingCartID, double total, boolean primeEligible, int productListID) {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setAccountID(accountID);
         shoppingCart.setShoppingCartID(shoppingCartID);

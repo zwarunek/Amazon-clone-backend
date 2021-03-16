@@ -19,13 +19,13 @@ public class BrowsingHistory {
     @Column(name = "MostRecentView") private int recentView;
 
 
-    public Address constructEntity(int accountID, int productID, int timesViewed, int recentView) {
+    public BrowsingHistory constructEntity(int accountID, int productID, int timesViewed, int recentView) {
         BrowsingHistory browsingHistory = new BrowsingHistory();
         browsingHistory.setAccountID(accountID);
         browsingHistory.setProductID(productID);
         browsingHistory.setTimesViewed(timesViewed);
         browsingHistory.setRecentView(recentView);
-        return ;
+        return browsingHistory;
     }
 
     @Override
