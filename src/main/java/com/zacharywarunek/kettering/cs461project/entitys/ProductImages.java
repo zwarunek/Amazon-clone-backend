@@ -8,6 +8,8 @@ public class ProductImages {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name = "PIID")
+    private int ProductImageId;
     @Column(name = "PID")
     private int ProductId;
     @Column(name = "Image")
@@ -34,5 +36,13 @@ public class ProductImages {
 
     public void setImage(String name) {
         this.image = name;
+    }
+
+    public int getProductImageId() {
+        return ProductImageId;
+    }
+
+    public void setProductImageId(int productImageId) {
+        ProductImageId = productImageId;
     }
 }
