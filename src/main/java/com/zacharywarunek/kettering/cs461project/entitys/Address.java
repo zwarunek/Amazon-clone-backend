@@ -28,7 +28,9 @@ public class Address {
 
     @Column(name = "Favorite") private  boolean favorite;
 
-    public Address constructEntity(int accountID, int addressID, String houseNbr, String street, String city, String state, String country, int zipcode, boolean favorite) {
+    @Column(name = "Name") private String name;
+
+    public Address constructEntity(int accountID, int addressID, String houseNbr, String street, String city, String state, String country, int zipcode, boolean favorite,String name) {
         Address address = new Address();
         address.setAccountID(accountID);
         address.setAddressID(addressID);
@@ -39,12 +41,13 @@ public class Address {
         address.setCountry(country);
         address.setZipcode(zipcode);
         address.setFavorite(favorite);
+        address.setName(name);
         return address;
     }
 
     @Override
     public String toString(){
-        return String.format("Address [addressID=%d, addressID=%d, houseNbr=%s,street=%s,city=%s,state=%s,country=%s,zipcode=%d,favorite=%b]",addressID,addressID,houseNbr,street,city,state,country,zipcode,favorite);
+        return String.format("Address [addressID=%d, addressID=%d, houseNbr=%s,street=%s,city=%s,state=%s,country=%s,zipcode=%d,favorite=%b, name=%s]",addressID,addressID,houseNbr,street,city,state,country,zipcode,favorite,name);
     }
     public int getAccountID(){
         return accountID;
@@ -100,7 +103,12 @@ public class Address {
     public void setFavorite(boolean favorite){
         this.favorite = favorite;
     }
-
+public String getName(){
+        return name;
+}
+public void setName(String name){
+        this.name = name;
+}
 
 
 }

@@ -1,22 +1,20 @@
 package com.zacharywarunek.kettering.cs461project;
 
-import com.zacharywarunek.kettering.cs461project.entitys.Account;
-import com.zacharywarunek.kettering.cs461project.entitys.Category;
-import com.zacharywarunek.kettering.cs461project.entitys.Product;
-import com.zacharywarunek.kettering.cs461project.repositories.ICategoryRepo;
-import com.zacharywarunek.kettering.cs461project.repositories.IProductImagesRepo;
-import com.zacharywarunek.kettering.cs461project.repositories.IProductRepo;
+import com.zacharywarunek.kettering.cs461project.entitys.*;
+import com.zacharywarunek.kettering.cs461project.repositories.*;
 import com.zacharywarunek.kettering.cs461project.util.AuthRequest;
-import com.zacharywarunek.kettering.cs461project.repositories.IAccountRepo;
 import com.zacharywarunek.kettering.cs461project.service.CustomUserDetailsService;
 import com.zacharywarunek.kettering.cs461project.config.JwtUtil;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
-import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
@@ -35,7 +33,19 @@ public class Service {
     IProductRepo productRepo;
 
     @Autowired
+    IPaymentTypeRepo paymentTypeRepo;
+
+    @Autowired
+    IPaymentMethodRepo paymentMethodRepo;
+
+    @Autowired
+    IAddressRepo addressRepo;
+
+    @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -85,7 +95,7 @@ public class Service {
         }
         return response;
     }
-    private String hashPassword(String password) throws NoSuchAlgorithmException {
+    private String hashPassword(String password) {
         int workload = 12;
         String salt = BCrypt.gensalt(workload);
         String hashed_password = BCrypt.hashpw(password, salt);
@@ -149,21 +159,6 @@ public class Service {
         return response;
 
     }
-    public ResponseObject searchProducts(String search) {
-        ResponseObject response = new ResponseObject();
-        Collection<Product> products = productRepo.searchProducts(search);
-        if(products != null){
-            response.setStatus(200);
-            response.setMessage("Products were found");
-            response.setData(products);
-        }
-        else{
-            response.setStatus(404);
-            response.setMessage("No products were found");
-        }
-        return response;
-
-    }
 
     public ResponseObject getAllCategories() {
         ResponseObject response = new ResponseObject();
@@ -194,6 +189,260 @@ public class Service {
         accountRepo.changePrimeMembership(member, accountId);
         response.setStatus(200);
         response.setData(accountRepo.fetchAccountByAccountId(accountId));
+        return response;
+    }
+    public ResponseObject changeAccountDetails(JSONObject jsonPayload){
+        ResponseObject response = new ResponseObject();
+        boolean updatePassword = jsonPayload.getBoolean("updatePassword");
+        String password = updatePassword?hashPassword(jsonPayload.getString("password")): jsonPayload.getString("password");
+        Account account = new Account();
+        try {
+
+            account = account.constructEntity(jsonPayload.getString("firstName"), jsonPayload.getString("lastName"),password,jsonPayload.getBoolean("primeMember"),jsonPayload.getString("email"));
+            account.setAccountId(jsonPayload.getInt("accountId"));
+            accountRepo.save(account);
+            account.setToken(jsonPayload.getString("token"));
+            response.setStatus(200);
+            response.setMessage("Account has been updated");
+            response.setData(account);
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when updating your account");
+            response.setData("An error occurred when updating an account :  " + e.getMessage());
+        }
+        return response;
+    }
+
+    public ResponseObject checkPassword(AuthRequest payloadFromUI) {
+        ResponseObject response = new ResponseObject();
+        Account account;
+        try {
+
+            account = accountRepo.fetchAccountByEmail(payloadFromUI.getEmail());
+            if(account != null && checkPassword(payloadFromUI.getPassword(), account.getPassword())){
+                response.setStatus(200);
+            }
+            else{
+                response.setStatus(403);
+                response.setMessage("Current password was incorrect");
+            }
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when authenticating your password");
+        }
+        return response;
+    }
+
+
+    public ResponseObject savePaymentMethod(JSONObject json){
+        ResponseObject response = new ResponseObject();
+        PaymentMethod paymentMethod = new PaymentMethod();
+        try {
+            paymentMethod = paymentMethod.constructEntity(json.getInt("accountId"), json.getInt("typeId"), json.getString("nameOnCard"), json.getString("cardNumber"), json.getString("exp"), json.getString("cvv"));
+            if(json.has("pmid"))
+                paymentMethod.setPmId(json.getInt("pmid"));
+            if(json.has("favorite"))
+                paymentMethod.setFavorite(json.getBoolean("favorite"));
+
+            paymentMethodRepo.save(paymentMethod);
+            response.setStatus(200);
+            response.setMessage("Payment Method has been created");
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when creating payment method");
+
+        }
+        return response;
+    }
+
+    public ResponseObject getAllPaymentMethods(int accountId) {
+        ResponseObject response = new ResponseObject();
+        String query = "SELECT pt.imageSrc, pt.TypeName, pm.NameOnCard, pm.CardNumber, pm.Cvv, pm.Exp, pm.Favorite, pm.PMID " +
+                "FROM PaymentType pt " +
+                "INNER JOIN PaymentMethod PM on pt.TypeId = PM.TypeId " +
+                "where AccountID = " + accountId +
+                " order by pm.Favorite DESC";
+        Collection<JSONObject> paymentMethods = jdbcTemplate.query(query, new RowMapper<JSONObject>() {
+            @Override
+            public JSONObject mapRow(ResultSet rs, int i) throws SQLException {
+                JSONObject json = new JSONObject();
+                json.put("image", rs.getString(1));
+                json.put("type", rs.getString(2));
+                json.put("nameOnCard", rs.getString(3));
+                json.put("cardNumber", rs.getString(4));
+                json.put("cvv", rs.getString(5));
+                json.put("exp", rs.getString(6));
+                json.put("favorite", rs.getBoolean(7));
+                json.put("PMID", rs.getInt(8));
+                return json;
+            }
+        });
+        if(!paymentMethods.isEmpty()){
+            response.setStatus(200);
+            response.setMessage("Payment methods were found");
+            response.setData(paymentMethods.toString());
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("No payment methods found");
+        }
+        return response;
+
+    }
+
+    public ResponseObject setPaymentMethodFavorite(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        String query = "update PaymentMethod set Favorite = 0 where AccountID = "+jsonPayload.getInt("accountId")+" and Favorite = 1;" +
+                " update PaymentMethod set Favorite = 1 where AccountID = "+jsonPayload.getInt("accountId")+" and PMID =  " + jsonPayload.getInt("PMID");
+        jdbcTemplate.update(query);
+        response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject getAllPaymentTypes() {
+        ResponseObject response = new ResponseObject();
+        Collection<PaymentType> paymentTypes = paymentTypeRepo.fetchAllPaymentTypes();
+        response.setStatus(200);
+        response.setData(paymentTypes);
+        return response;
+
+    }
+    public ResponseObject deletePaymentMethod(JSONObject json) {
+        ResponseObject response = new ResponseObject();
+        paymentMethodRepo.deleteById(json.getInt("pmid"));
+        response.setStatus(200);
+        return response;
+
+    }
+    public ResponseObject searchProducts(String k, int c, boolean prime){
+        ResponseObject response = new ResponseObject();
+        String[] list = k.split(" ");
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT *\n" +
+                "FROM(\n" +
+                "        SELECT\n" +
+                "            t1.PID,\n" +
+                "            Name,\n" +
+                "            Description,\n" +
+                "            Seller,\n" +
+                "            Price,\n" +
+                "            PrimeEligible,\n" +
+                "            Stock,\n" +
+                "            Category,\n" +
+                "            Image,\n" +
+                "\n" +
+                "            ROW_NUMBER() OVER(PARTITION BY t1.PID ORDER BY t2.PIID) AS Row\n" +
+                "        FROM Product t1\n" +
+                "                 LEFT JOIN ProductImages t2\n" +
+                "                           ON t1.PID = t2.PID) AS X where Row = 1 and");
+        for(String word: list){
+            query.append(" (Name like '%").append(word).append("%' or Description like '%").append(word).append("%' ").append("or");
+        }
+        query.replace(query.length() - 2, query.length(), ")");
+        if(c!=0){
+            query.append(" and Category=").append(c);
+        }
+        if(prime){
+            query.append(" and PrimeEligible=").append(1);
+        }
+        query.append(";");
+        Collection<JSONObject> products = jdbcTemplate.query(query.toString(), new RowMapper<JSONObject>() {
+            @Override
+            public JSONObject mapRow(ResultSet rs, int i) throws SQLException {
+                JSONObject products = new JSONObject();
+                products.put("productId", rs.getInt(1));
+                products.put("name", rs.getString(2));
+                products.put("description", rs.getString(3));
+                products.put("seller", rs.getString(4));
+                products.put("price", rs.getDouble(5));
+                products.put("primeEligible", rs.getBoolean(6));
+                products.put("stock", rs.getInt(7));
+                products.put("category", rs.getInt(8));
+                products.put("image", rs.getString(9));
+                return products;
+            }
+        });
+        response.setData(products.toString());
+        return response;
+    }
+
+    public ResponseObject saveProduct(JSONObject payload) {
+        ResponseObject response = new ResponseObject();
+        Product product = new Product();
+        product = product.constructEntity(payload.getString("name"),
+                payload.getString("description"),
+                payload.getString("seller"),
+                payload.getDouble("price"),
+                payload.getBoolean("primeEligible"),
+                payload.getInt("stock"),
+                payload.getInt("category"));
+        product = productRepo.save(product);
+        String[] imageList = payload.getString("image").split(",");
+        for(String image: imageList){
+            ProductImages productImages = new ProductImages();
+            productImages = productImages.constructEntity(product.getProductId(),
+                    image);
+            productImagesRepo.save(productImages);
+
+        }
+        response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject saveAddress(JSONObject json){
+        ResponseObject response = new ResponseObject();
+        Address address = new Address();
+        try {
+            address = address.constructEntity(json.getInt("accountId"), json.getString("address"), json.getString("city"), json.getString("state"), json.getInt("zipcode"), json.getString("name"));
+            if(json.has("addressId"))
+                address.setAddressId(json.getInt("addressId"));
+            if(json.has("favorite"))
+                address.setFavorite(json.getBoolean("favorite"));
+
+            addressRepo.save(address);
+            response.setStatus(200);
+            response.setMessage("Address has been created");
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when creating address");
+
+        }
+        return response;
+    }
+
+    public ResponseObject setAddressFavorite(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        String query = "update Address set Favorite = 0 where AccountID = "+jsonPayload.getInt("accountId")+" and Favorite = 1;" +
+                " update Address set Favorite = 1 where AccountID = "+jsonPayload.getInt("accountId")+" and AddressId =  " + jsonPayload.getInt("AddressId");
+        jdbcTemplate.update(query);
+        response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject getAllAddresses(int accountId) {
+        ResponseObject response = new ResponseObject();
+        Collection<Address> addresses = addressRepo.fetchAllAddressesByAccountId(accountId);
+        if(!addresses.isEmpty()){
+            response.setStatus(200);
+            response.setMessage("Addresses were found");
+            response.setData(addresses);
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("No Addresses found");
+        }
+        return response;
+
+    }
+
+    public ResponseObject deleteAddress(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        addressRepo.deleteById(jsonPayload.getInt("addressId"));
+        response.setStatus(200);
         return response;
     }
 }

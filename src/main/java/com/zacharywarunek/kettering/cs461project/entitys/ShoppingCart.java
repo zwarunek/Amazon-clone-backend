@@ -11,8 +11,6 @@ public class ShoppingCart{
 
     @Column(name = "AccountID") private int accountID;
 
-    @Column(name = "ShoppingCartID") private int shoppingCartID;
-
     @Column(name = "Total") private double total;
 
     @Column(name = "PrimeEligible") private boolean primeEligible;
@@ -20,10 +18,9 @@ public class ShoppingCart{
     @Column(name = "ProductListID") private  int productListID;
 
 
-    public ShoppingCart constructEntity(int accountID, int shoppingCartID, double total, boolean primeEligible, int productListID) {
+    public ShoppingCart constructEntity(int accountID, double total, boolean primeEligible, int productListID) {
         ShoppingCart shoppingCart = new ShoppingCart();
         shoppingCart.setAccountID(accountID);
-        shoppingCart.setShoppingCartID(shoppingCartID);
         shoppingCart.setTotal(total);
         shoppingCart.setPrimeEligible(primeEligible);
         shoppingCart.setProductListID(productListID);
@@ -39,12 +36,6 @@ public class ShoppingCart{
     }
     public void setAccountID(int accountID){
         this.accountID =accountID;
-    }
-    public int getShoppingCartID(){
-        return shoppingCartID;
-    }
-    public void setShoppingCartID(int shoppingCartID){
-        this.shoppingCartID =shoppingCartID;
     }
     public double getTotal(){
         return total;

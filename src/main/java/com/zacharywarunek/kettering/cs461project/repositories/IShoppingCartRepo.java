@@ -25,5 +25,8 @@ public interface IShoppingCartRepo extends IJPABaseRepo<ShoppingCart, String> {
     ShoppingCart fetchShoppingCartByPrimeEligibleAndAccountID(int accountID, boolean primeEligible);
 
     @Query(value = "SELECT * FROM ShoppingCart WHERE ProductListID=? AND AccountID=?", nativeQuery = true)
-    ShoppingCart fetchShoppingCartByProductListIDAndAccountID(int accountID, String productListID);
+    ShoppingCart fetchShoppingCartByProductListIDAndAccountID(int accountID, int productListID);
+
+    @Query(value = "DELETE * FROM ShoppingCart WHERE ProductListID=? AND AccountID=?", nativeQuery = true)
+    ShoppingCart deleteByPIDaAID(int accountID, int productListID);
 }
