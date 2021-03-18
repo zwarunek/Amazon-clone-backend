@@ -125,4 +125,29 @@ public class MainController {
         ResponseObject response = service.saveProduct(json);
         return response;
     }
+    @RequestMapping(value = "/saveAddress", method = RequestMethod.POST)
+    public ResponseObject saveAddress(@RequestBody String  payload){
+        JSONObject json = new JSONObject(payload);
+        ResponseObject response = service.saveAddress(json.getJSONObject("address"));
+        return response;
+    }
+    @RequestMapping(value = "/getAllAddresses", method = RequestMethod.GET)
+    public ResponseObject getAllAddresses(@RequestParam int accountId){
+        ResponseObject response = service.getAllAddresses(accountId);
+        return response;
+    }
+
+    @RequestMapping(value = "/setAddressFavorite", method = RequestMethod.POST)
+    public ResponseObject setAddressFavorite(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.setAddressFavorite(jsonPayload);
+        return response;
+    }
+
+    @RequestMapping(value = "/deleteAddress", method = RequestMethod.POST)
+    public ResponseObject deleteAddress(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.deleteAddress(jsonPayload);
+        return response;
+    }
 }

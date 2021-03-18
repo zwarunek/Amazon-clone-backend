@@ -39,6 +39,9 @@ public class Service {
     IPaymentMethodRepo paymentMethodRepo;
 
     @Autowired
+    IAddressRepo addressRepo;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
@@ -240,6 +243,8 @@ public class Service {
             paymentMethod = paymentMethod.constructEntity(json.getInt("accountId"), json.getInt("typeId"), json.getString("nameOnCard"), json.getString("cardNumber"), json.getString("exp"), json.getString("cvv"));
             if(json.has("pmid"))
                 paymentMethod.setPmId(json.getInt("pmid"));
+            if(json.has("favorite"))
+                paymentMethod.setFavorite(json.getBoolean("favorite"));
 
             paymentMethodRepo.save(paymentMethod);
             response.setStatus(200);
@@ -383,6 +388,60 @@ public class Service {
             productImagesRepo.save(productImages);
 
         }
+        response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject saveAddress(JSONObject json){
+        ResponseObject response = new ResponseObject();
+        Address address = new Address();
+        try {
+            address = address.constructEntity(json.getInt("accountId"), json.getString("address"), json.getString("city"), json.getString("state"), json.getInt("zipcode"), json.getString("name"));
+            if(json.has("addressId"))
+                address.setAddressId(json.getInt("addressId"));
+            if(json.has("favorite"))
+                address.setFavorite(json.getBoolean("favorite"));
+
+            addressRepo.save(address);
+            response.setStatus(200);
+            response.setMessage("Address has been created");
+        }
+        catch (Exception e){
+            response.setStatus(411);
+            response.setMessage("An error occurred when creating address");
+
+        }
+        return response;
+    }
+
+    public ResponseObject setAddressFavorite(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        String query = "update Address set Favorite = 0 where AccountID = "+jsonPayload.getInt("accountId")+" and Favorite = 1;" +
+                " update Address set Favorite = 1 where AccountID = "+jsonPayload.getInt("accountId")+" and AddressId =  " + jsonPayload.getInt("AddressId");
+        jdbcTemplate.update(query);
+        response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject getAllAddresses(int accountId) {
+        ResponseObject response = new ResponseObject();
+        Collection<Address> addresses = addressRepo.fetchAllAddressesByAccountId(accountId);
+        if(!addresses.isEmpty()){
+            response.setStatus(200);
+            response.setMessage("Addresses were found");
+            response.setData(addresses);
+        }
+        else{
+            response.setStatus(404);
+            response.setMessage("No Addresses found");
+        }
+        return response;
+
+    }
+
+    public ResponseObject deleteAddress(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        addressRepo.deleteById(jsonPayload.getInt("addressId"));
         response.setStatus(200);
         return response;
     }
