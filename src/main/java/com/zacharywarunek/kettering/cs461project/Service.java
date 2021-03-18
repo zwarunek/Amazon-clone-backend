@@ -156,21 +156,6 @@ public class Service {
         return response;
 
     }
-    public ResponseObject searchProducts(String search) {
-        ResponseObject response = new ResponseObject();
-        Collection<Product> products = productRepo.searchProducts(search);
-        if(products != null){
-            response.setStatus(200);
-            response.setMessage("Products were found");
-            response.setData(products);
-        }
-        else{
-            response.setStatus(404);
-            response.setMessage("No products were found");
-        }
-        return response;
-
-    }
 
     public ResponseObject getAllCategories() {
         ResponseObject response = new ResponseObject();
@@ -326,5 +311,79 @@ public class Service {
         response.setStatus(200);
         return response;
 
+    }
+    public ResponseObject searchProducts(String k, int c, boolean prime){
+        ResponseObject response = new ResponseObject();
+        String[] list = k.split(" ");
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT *\n" +
+                "FROM(\n" +
+                "        SELECT\n" +
+                "            t1.PID,\n" +
+                "            Name,\n" +
+                "            Description,\n" +
+                "            Seller,\n" +
+                "            Price,\n" +
+                "            PrimeEligible,\n" +
+                "            Stock,\n" +
+                "            Category,\n" +
+                "            Image,\n" +
+                "\n" +
+                "            ROW_NUMBER() OVER(PARTITION BY t1.PID ORDER BY t2.PIID) AS Row\n" +
+                "        FROM Product t1\n" +
+                "                 LEFT JOIN ProductImages t2\n" +
+                "                           ON t1.PID = t2.PID) AS X where Row = 1 and");
+        for(String word: list){
+            query.append(" (Name like '%").append(word).append("%' or Description like '%").append(word).append("%' ").append("or");
+        }
+        query.replace(query.length() - 2, query.length(), ")");
+        if(c!=0){
+            query.append(" and Category=").append(c);
+        }
+        if(prime){
+            query.append(" and PrimeEligible=").append(1);
+        }
+        query.append(";");
+        Collection<JSONObject> products = jdbcTemplate.query(query.toString(), new RowMapper<JSONObject>() {
+            @Override
+            public JSONObject mapRow(ResultSet rs, int i) throws SQLException {
+                JSONObject products = new JSONObject();
+                products.put("productId", rs.getInt(1));
+                products.put("name", rs.getString(2));
+                products.put("description", rs.getString(3));
+                products.put("seller", rs.getString(4));
+                products.put("price", rs.getDouble(5));
+                products.put("primeEligible", rs.getBoolean(6));
+                products.put("stock", rs.getInt(7));
+                products.put("category", rs.getInt(8));
+                products.put("image", rs.getString(9));
+                return products;
+            }
+        });
+        response.setData(products.toString());
+        return response;
+    }
+
+    public ResponseObject saveProduct(JSONObject payload) {
+        ResponseObject response = new ResponseObject();
+        Product product = new Product();
+        product = product.constructEntity(payload.getString("name"),
+                payload.getString("description"),
+                payload.getString("seller"),
+                payload.getDouble("price"),
+                payload.getBoolean("primeEligible"),
+                payload.getInt("stock"),
+                payload.getInt("category"));
+        product = productRepo.save(product);
+        String[] imageList = payload.getString("image").split(",");
+        for(String image: imageList){
+            ProductImages productImages = new ProductImages();
+            productImages = productImages.constructEntity(product.getProductId(),
+                    image);
+            productImagesRepo.save(productImages);
+
+        }
+        response.setStatus(200);
+        return response;
     }
 }

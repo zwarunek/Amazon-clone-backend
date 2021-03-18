@@ -56,8 +56,9 @@ public class MainController {
         return response;
     }
     @RequestMapping(value = "/searchProducts", method = RequestMethod.GET)
-    public ResponseObject getAllProducts(@RequestParam String search){
-        ResponseObject response = service.searchProducts(search);
+    public ResponseObject getAllProducts(@RequestParam String k, @RequestParam int c, @RequestParam boolean prime){
+
+        ResponseObject response = service.searchProducts(k, c, prime);
         return response;
     }
     @RequestMapping(value = "/getProductImages", method = RequestMethod.GET)
@@ -116,6 +117,12 @@ public class MainController {
     public ResponseObject deletePaymentMethod(@RequestBody String payloadFromUI){
         JSONObject jsonPayload = new JSONObject(payloadFromUI);
         ResponseObject response = service.deletePaymentMethod(jsonPayload);
+        return response;
+    }
+    @RequestMapping(value = "/saveProduct", method = RequestMethod.POST)
+    public ResponseObject saveProduct(@RequestBody String  payload){
+        JSONObject json = new JSONObject(payload);
+        ResponseObject response = service.saveProduct(json);
         return response;
     }
 }
