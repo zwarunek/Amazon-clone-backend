@@ -163,10 +163,17 @@ public class MainController {
         return response;
     }
 
-    @RequestMapping(value = "/changeQuantityCartItem", method = RequestMethod.POST)
+    @RequestMapping(value = "/changeQuantityCartItem", method = RequestMethod.PATCH)
     public ResponseObject changeQuantityCartItem(@RequestBody String payloadFromUI){
         JSONObject jsonPayload = new JSONObject(payloadFromUI);
         ResponseObject response = service.changeQuantityCartItem(jsonPayload);
+        return response;
+    }
+
+    @RequestMapping(value = "/addToCart", method = RequestMethod.POST)
+    public ResponseObject addToCart(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.addToCart(jsonPayload);
         return response;
     }
 }
