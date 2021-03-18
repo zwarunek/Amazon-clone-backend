@@ -150,4 +150,23 @@ public class MainController {
         ResponseObject response = service.deleteAddress(jsonPayload);
         return response;
     }
+    @RequestMapping(value = "/fetchCartItems", method = RequestMethod.GET)
+    public ResponseObject fetchCartItems(@RequestParam int accountId){
+        ResponseObject response = service.fetchCartItems(accountId);
+        return response;
+    }
+
+    @RequestMapping(value = "/removeCartItem", method = RequestMethod.POST)
+    public ResponseObject removeCartItem(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.removeCartItem(jsonPayload);
+        return response;
+    }
+
+    @RequestMapping(value = "/changeQuantityCartItem", method = RequestMethod.POST)
+    public ResponseObject changeQuantityCartItem(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.changeQuantityCartItem(jsonPayload);
+        return response;
+    }
 }

@@ -13,6 +13,8 @@ public class PaymentMethod {
     private int pmId;
     @Column(name = "AccountId")
     private int accountId;
+    @Column(name = "AddressId")
+    private int addressId;
     @Column(name = "TypeId")
     private int typeId;
     @Column(name = "NameOnCard")
@@ -26,9 +28,10 @@ public class PaymentMethod {
     @Column(name = "Favorite")
     private boolean favorite;
 
-    public PaymentMethod constructEntity(int accountId, int typeId, String nameOnCard, String cardNumber, String exp, String cvv) {
+    public PaymentMethod constructEntity(int accountId, int addressId, int typeId, String nameOnCard, String cardNumber, String exp, String cvv) {
         PaymentMethod paymentMethod = new PaymentMethod();
         paymentMethod.setAccountId(accountId);
+        paymentMethod.setAddressId(addressId);
         paymentMethod.setTypeId(typeId);
         paymentMethod.setNameOnCard(nameOnCard);
         paymentMethod.setCardNumber(cardNumber);
@@ -107,4 +110,11 @@ public class PaymentMethod {
         this.favorite = favorite;
     }
 
+    public int getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(int addressId) {
+        this.addressId = addressId;
+    }
 }

@@ -240,7 +240,7 @@ public class Service {
         ResponseObject response = new ResponseObject();
         PaymentMethod paymentMethod = new PaymentMethod();
         try {
-            paymentMethod = paymentMethod.constructEntity(json.getInt("accountId"), json.getInt("typeId"), json.getString("nameOnCard"), json.getString("cardNumber"), json.getString("exp"), json.getString("cvv"));
+            paymentMethod = paymentMethod.constructEntity(json.getInt("accountId"), json.getInt("addressId"), json.getInt("typeId"), json.getString("nameOnCard"), json.getString("cardNumber"), json.getString("exp"), json.getString("cvv"));
             if(json.has("pmid"))
                 paymentMethod.setPmId(json.getInt("pmid"));
             if(json.has("favorite"))
@@ -260,7 +260,7 @@ public class Service {
 
     public ResponseObject getAllPaymentMethods(int accountId) {
         ResponseObject response = new ResponseObject();
-        String query = "SELECT pt.imageSrc, pt.TypeName, pm.NameOnCard, pm.CardNumber, pm.Cvv, pm.Exp, pm.Favorite, pm.PMID " +
+        String query = "SELECT pt.imageSrc, pt.TypeName, pm.NameOnCard, pm.CardNumber, pm.Cvv, pm.Exp, pm.Favorite, pm.PMID, pm.AddressId " +
                 "FROM PaymentType pt " +
                 "INNER JOIN PaymentMethod PM on pt.TypeId = PM.TypeId " +
                 "where AccountID = " + accountId +
@@ -277,6 +277,7 @@ public class Service {
                 json.put("exp", rs.getString(6));
                 json.put("favorite", rs.getBoolean(7));
                 json.put("PMID", rs.getInt(8));
+                json.put("addressId", rs.getInt(9));
                 return json;
             }
         });
@@ -443,6 +444,23 @@ public class Service {
         ResponseObject response = new ResponseObject();
         addressRepo.deleteById(jsonPayload.getInt("addressId"));
         response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject changeQuantityCartItem(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        return response;
+    }
+
+    public ResponseObject removeCartItem(JSONObject jsonPayload) {
+
+        ResponseObject response = new ResponseObject();
+        return response;
+    }
+
+    public ResponseObject fetchCartItems(int accountId) {
+
+        ResponseObject response = new ResponseObject();
         return response;
     }
 }
