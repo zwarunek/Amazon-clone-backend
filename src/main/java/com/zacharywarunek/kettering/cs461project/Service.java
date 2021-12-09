@@ -42,6 +42,9 @@ public class Service {
     IAddressRepo addressRepo;
 
     @Autowired
+    ICartItemRepo cartItemRepo;
+
+    @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
@@ -240,7 +243,7 @@ public class Service {
         ResponseObject response = new ResponseObject();
         PaymentMethod paymentMethod = new PaymentMethod();
         try {
-            paymentMethod = paymentMethod.constructEntity(json.getInt("accountId"), json.getInt("typeId"), json.getString("nameOnCard"), json.getString("cardNumber"), json.getString("exp"), json.getString("cvv"));
+            paymentMethod = paymentMethod.constructEntity(json.getInt("accountId"), json.getInt("addressId"), json.getInt("typeId"), json.getString("nameOnCard"), json.getString("cardNumber"), json.getString("exp"), json.getString("cvv"));
             if(json.has("pmid"))
                 paymentMethod.setPmId(json.getInt("pmid"));
             if(json.has("favorite"))
@@ -260,7 +263,7 @@ public class Service {
 
     public ResponseObject getAllPaymentMethods(int accountId) {
         ResponseObject response = new ResponseObject();
-        String query = "SELECT pt.imageSrc, pt.TypeName, pm.NameOnCard, pm.CardNumber, pm.Cvv, pm.Exp, pm.Favorite, pm.PMID " +
+        String query = "SELECT pt.imageSrc, pt.TypeName, pm.NameOnCard, pm.CardNumber, pm.Cvv, pm.Exp, pm.Favorite, pm.PMID, pm.AddressId " +
                 "FROM PaymentType pt " +
                 "INNER JOIN PaymentMethod PM on pt.TypeId = PM.TypeId " +
                 "where AccountID = " + accountId +
@@ -277,6 +280,7 @@ public class Service {
                 json.put("exp", rs.getString(6));
                 json.put("favorite", rs.getBoolean(7));
                 json.put("PMID", rs.getInt(8));
+                json.put("addressId", rs.getInt(9));
                 return json;
             }
         });
@@ -444,5 +448,61 @@ public class Service {
         addressRepo.deleteById(jsonPayload.getInt("addressId"));
         response.setStatus(200);
         return response;
+    }
+
+    public ResponseObject changeQuantityCartItem(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        cartItemRepo.changeQuantity(jsonPayload.getInt("newQuantity"), jsonPayload.getInt("cartItemId"));
+        response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject removeCartItem(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        cartItemRepo.deleteById(jsonPayload.getInt("cartItemId"));
+        return response;
+    }
+
+    public ResponseObject fetchCartItems(int accountId) {
+        ResponseObject response = new ResponseObject();
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT cart.CartItemId, cart.Price, cart.Quantity, p.Stock, p.PrimeEligible, p.Description, p.Name, p.Seller, x.Image, p.PID " +
+                "FROM CartItem cart " +
+                "    INNER JOIN Product P " +
+                "        on cart.PID = P.PID inner join (select * from (SELECT t1.PID, t2.Image, " +
+                "                                                              ROW_NUMBER() OVER(PARTITION BY t1.PID ORDER BY t2.PIID) AS Row " +
+                "                                                       FROM Product t1 LEFT JOIN ProductImages t2 ON t1.PID = t2.PID) as X where Row = 1) x " +
+                "            on cart.PID = x.PID " +
+                "WHERE AccountID=").append(accountId).append(";");
+        Collection<JSONObject> products = jdbcTemplate.query(query.toString(), (rs, i) -> {
+            JSONObject products1 = new JSONObject();
+            products1.put("cartItemId", rs.getInt(1));
+            products1.put("price", rs.getDouble(2));
+            products1.put("quantity", rs.getInt(3));
+            products1.put("stock", rs.getInt(4));
+            products1.put("primeEligible", rs.getBoolean(5));
+            products1.put("description", rs.getString(6));
+            products1.put("name", rs.getString(7));
+            products1.put("seller", rs.getString(8));
+            products1.put("image", rs.getString(9));
+            products1.put("productId", rs.getString(10));
+            return products1;
+        });
+        response.setData(products.toString());
+        response.setStatus(200);
+        return response;
+    }
+
+    public ResponseObject addToCart(JSONObject jsonPayload) {
+        ResponseObject response = new ResponseObject();
+        CartItem cartItem = new CartItem();
+        cartItem = cartItem.constructEntity(jsonPayload.getInt("accountId"), jsonPayload.getDouble("price"), jsonPayload.getInt("quantity"), jsonPayload.getInt("productId"));
+        if(jsonPayload.has("cartItemId")){
+            cartItem.setCartItemId(jsonPayload.getInt("cartItemId"));
+        }
+        cartItemRepo.save(cartItem);
+        response.setStatus(200);
+        return response;
+
     }
 }

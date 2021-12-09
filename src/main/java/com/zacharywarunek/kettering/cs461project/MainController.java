@@ -6,25 +6,19 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "http://loaclhost:4200", allowedHeaders = "*")
+@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "*")
 @RestController
 public class MainController {
 
     @Autowired
     private Service service;
 
-
-    @GetMapping("/")
-    public String welcome() {
-        return "Welcome to Amazon";
-    }
-
     @RequestMapping(value = "/apiTest", method = RequestMethod.GET)
     public ResponseObject apiTest(){
         ResponseObject response = new ResponseObject();
         response.setData("inside /apiTest");
         response.setStatus(200);
-        response.setMessage("All Good Here");
+        response.setMessage("API is functioning normally");
         return response;
     }
 
@@ -148,6 +142,32 @@ public class MainController {
     public ResponseObject deleteAddress(@RequestBody String payloadFromUI){
         JSONObject jsonPayload = new JSONObject(payloadFromUI);
         ResponseObject response = service.deleteAddress(jsonPayload);
+        return response;
+    }
+    @RequestMapping(value = "/fetchCartItems", method = RequestMethod.GET)
+    public ResponseObject fetchCartItems(@RequestParam int accountId){
+        ResponseObject response = service.fetchCartItems(accountId);
+        return response;
+    }
+
+    @RequestMapping(value = "/removeCartItem", method = RequestMethod.POST)
+    public ResponseObject removeCartItem(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.removeCartItem(jsonPayload);
+        return response;
+    }
+
+    @RequestMapping(value = "/changeQuantityCartItem", method = RequestMethod.PATCH)
+    public ResponseObject changeQuantityCartItem(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.changeQuantityCartItem(jsonPayload);
+        return response;
+    }
+
+    @RequestMapping(value = "/addToCart", method = RequestMethod.POST)
+    public ResponseObject addToCart(@RequestBody String payloadFromUI){
+        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+        ResponseObject response = service.addToCart(jsonPayload);
         return response;
     }
 }
