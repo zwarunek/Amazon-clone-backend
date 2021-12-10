@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface IProductImagesRepo extends IJPABaseRepo<ProductImages, String> {
+public interface IProductImagesRepo extends IJPABaseRepo<ProductImages> {
 
     @Query(value = "SELECT Image FROM ProductImages WHERE PID=?", nativeQuery = true)
     Collection<String> fetchProductImagesById(int productId);

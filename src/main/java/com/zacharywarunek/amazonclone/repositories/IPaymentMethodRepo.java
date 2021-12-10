@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface IPaymentMethodRepo extends IJPABaseRepo<PaymentMethod, String> {
+public interface IPaymentMethodRepo extends IJPABaseRepo<PaymentMethod> {
 
     @Query(value = "SELECT * FROM PaymentMethod where AccountId = ?", nativeQuery = true)
     Collection<PaymentMethod> fetchAllPaymentMethods(int accountId);

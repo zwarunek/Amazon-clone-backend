@@ -1,5 +1,6 @@
 package com.zacharywarunek.amazonclone.entitys;
 
+//TODO Create Browsing History table in database
 import javax.persistence.*;
 @Entity
 @Table(name = "BrowsingHistory")

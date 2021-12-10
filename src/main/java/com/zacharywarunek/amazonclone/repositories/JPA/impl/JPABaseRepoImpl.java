@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import javax.persistence.EntityManager;
 import java.io.Serializable;
 
-public class JPABaseRepoImpl <T, ID extends Serializable> extends SimpleJpaRepository<T, Serializable> implements IJPABaseRepo<T, Serializable> {
+public class JPABaseRepoImpl <T> extends SimpleJpaRepository<T, Serializable> implements IJPABaseRepo<T> {
 
-    private JpaEntityInformation<T, ?> entityInformation;
-    private EntityManager entityManager;
+    private final JpaEntityInformation<T, ?> entityInformation;
+    private final EntityManager entityManager;
 
     public JPABaseRepoImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager){
         super(entityInformation, entityManager);

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface IProductRepo extends IJPABaseRepo<Product, String> {
+public interface IProductRepo extends IJPABaseRepo<Product> {
 
     @Query(value = "SELECT * FROM Product", nativeQuery = true)
     Collection<Product> fetchAllProducts();

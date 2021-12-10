@@ -13,8 +13,13 @@ import java.util.ArrayList;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
+
+    private final IAccountRepo accountRepo;
+
     @Autowired
-    private IAccountRepo accountRepo;
+    public CustomUserDetailsService(IAccountRepo accountRepo){
+        this.accountRepo = accountRepo;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

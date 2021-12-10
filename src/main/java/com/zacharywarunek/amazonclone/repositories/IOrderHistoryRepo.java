@@ -5,8 +5,8 @@ import com.zacharywarunek.amazonclone.entitys.OrderHistory;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
-
-public interface IOrderHistoryRepo extends IJPABaseRepo<OrderHistory, String> {
+//TODO Create Order History table in database
+public interface IOrderHistoryRepo extends IJPABaseRepo<OrderHistory> {
     @Query(value = "SELECT * FROM OrderHistory", nativeQuery = true)
     Collection<OrderHistory> fetchAllOrderHistory();
 

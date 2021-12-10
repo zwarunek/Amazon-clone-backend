@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface IBrowsingHistoryRepo extends IJPABaseRepo<BrowsingHistory, String> {
+//TODO Create Browsing History table in database
+public interface IBrowsingHistoryRepo extends IJPABaseRepo<BrowsingHistory> {
     @Query(value = "SELECT * FROM BrowsingHistory", nativeQuery = true)
     Collection<BrowsingHistory> fetchAllBrowsingHistory();
 

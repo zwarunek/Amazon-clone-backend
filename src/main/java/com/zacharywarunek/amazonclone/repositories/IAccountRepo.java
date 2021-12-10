@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import javax.transaction.Transactional;
 import java.util.Collection;
 
-public interface IAccountRepo extends IJPABaseRepo<Account, String> {
+public interface IAccountRepo extends IJPABaseRepo<Account> {
     @Query(value = "SELECT * FROM Account", nativeQuery = true)
     Collection<Account> fetchAllAccounts();
 

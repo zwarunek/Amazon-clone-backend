@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface ICategoryRepo extends IJPABaseRepo<Category, String> {
+public interface ICategoryRepo extends IJPABaseRepo<Category> {
 
     @Query(value = "SELECT * FROM Category", nativeQuery = true)
     Collection<Category> fetchAllCategories();

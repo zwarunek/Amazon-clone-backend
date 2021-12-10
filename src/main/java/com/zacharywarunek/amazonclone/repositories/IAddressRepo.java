@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface IAddressRepo extends IJPABaseRepo<Address, String> {
+public interface IAddressRepo extends IJPABaseRepo<Address> {
 
     @Query(value = "SELECT * FROM Address where AccountId = ? order by Favorite DESC", nativeQuery = true)
     Collection<Address> fetchAllAddressesByAccountId(int accountId);

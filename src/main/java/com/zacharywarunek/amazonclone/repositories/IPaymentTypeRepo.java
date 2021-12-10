@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface IPaymentTypeRepo extends IJPABaseRepo<PaymentType, String> {
+public interface IPaymentTypeRepo extends IJPABaseRepo<PaymentType> {
 
     @Query(value = "SELECT * FROM PaymentType", nativeQuery = true)
     Collection<PaymentType> fetchAllPaymentTypes();

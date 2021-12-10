@@ -5,8 +5,6 @@ import com.zacharywarunek.amazonclone.entitys.*;
 import com.zacharywarunek.amazonclone.repositories.*;
 import com.zacharywarunek.amazonclone.service.CustomUserDetailsService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
-import com.zacharywarunek.amazonclone.entitys.*;
-import com.zacharywarunek.amazonclone.repositories.*;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,38 +20,52 @@ import java.util.Collection;
 @Component
 public class Service {
 
-    @Autowired
     IAccountRepo accountRepo;
 
-    @Autowired
     ICategoryRepo categoryRepo;
 
-    @Autowired
     IProductImagesRepo productImagesRepo;
 
-    @Autowired
     IProductRepo productRepo;
 
-    @Autowired
     IPaymentTypeRepo paymentTypeRepo;
 
-    @Autowired
     IPaymentMethodRepo paymentMethodRepo;
 
-    @Autowired
     IAddressRepo addressRepo;
 
-    @Autowired
     ICartItemRepo cartItemRepo;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
     JdbcTemplate jdbcTemplate;
 
+    private final CustomUserDetailsService userDetailsService;
+
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    public Service(IAccountRepo accountRepo,
+                   ICategoryRepo categoryRepo,
+                   IProductImagesRepo productImagesRepo,
+                   IProductRepo productRepo,
+                   IPaymentTypeRepo paymentTypeRepo,
+                   IPaymentMethodRepo paymentMethodRepo,
+                   IAddressRepo addressRepo,
+                   ICartItemRepo cartItemRepo,
+                   JwtUtil jwtUtil,
+                   JdbcTemplate jdbcTemplate,
+                   CustomUserDetailsService userDetailsService){
+        this.accountRepo = accountRepo;
+        this.categoryRepo = categoryRepo;
+        this.productImagesRepo = productImagesRepo;
+        this.productRepo = productRepo;
+        this.paymentTypeRepo = paymentTypeRepo;
+        this.paymentMethodRepo = paymentMethodRepo;
+        this.addressRepo = addressRepo;
+        this.cartItemRepo = cartItemRepo;
+        this.jwtUtil = jwtUtil;
+        this.jdbcTemplate = jdbcTemplate;
+        this.userDetailsService = userDetailsService;
+    }
 
     public ResponseObject Register(String payloadFromUI){
         ResponseObject response = new ResponseObject();
@@ -103,19 +115,15 @@ public class Service {
     private String hashPassword(String password) {
         int workload = 12;
         String salt = BCrypt.gensalt(workload);
-        String hashed_password = BCrypt.hashpw(password, salt);
 
-        return(hashed_password);
+        return(BCrypt.hashpw(password, salt));
     }
     private boolean checkPassword(String password_plaintext, String stored_hash) {
-        boolean password_verified = false;
 
         if(null == stored_hash || !stored_hash.startsWith("$2a$"))
             throw new java.lang.IllegalArgumentException("Invalid hash provided for comparison");
 
-        password_verified = BCrypt.checkpw(password_plaintext, stored_hash);
-
-        return(password_verified);
+        return(BCrypt.checkpw(password_plaintext, stored_hash));
     }
 
     public ResponseObject getProduct(int productId) {
@@ -270,21 +278,18 @@ public class Service {
                 "INNER JOIN PaymentMethod PM on pt.TypeId = PM.TypeId " +
                 "where AccountID = " + accountId +
                 " order by pm.Favorite DESC";
-        Collection<JSONObject> paymentMethods = jdbcTemplate.query(query, new RowMapper<JSONObject>() {
-            @Override
-            public JSONObject mapRow(ResultSet rs, int i) throws SQLException {
-                JSONObject json = new JSONObject();
-                json.put("image", rs.getString(1));
-                json.put("type", rs.getString(2));
-                json.put("nameOnCard", rs.getString(3));
-                json.put("cardNumber", rs.getString(4));
-                json.put("cvv", rs.getString(5));
-                json.put("exp", rs.getString(6));
-                json.put("favorite", rs.getBoolean(7));
-                json.put("PMID", rs.getInt(8));
-                json.put("addressId", rs.getInt(9));
-                return json;
-            }
+        Collection<JSONObject> paymentMethods = jdbcTemplate.query(query, (rs, i) -> {
+            JSONObject json = new JSONObject();
+            json.put("image", rs.getString(1));
+            json.put("type", rs.getString(2));
+            json.put("nameOnCard", rs.getString(3));
+            json.put("cardNumber", rs.getString(4));
+            json.put("cvv", rs.getString(5));
+            json.put("exp", rs.getString(6));
+            json.put("favorite", rs.getBoolean(7));
+            json.put("PMID", rs.getInt(8));
+            json.put("addressId", rs.getInt(9));
+            return json;
         });
         if(!paymentMethods.isEmpty()){
             response.setStatus(200);
@@ -355,21 +360,18 @@ public class Service {
             query.append(" and PrimeEligible=").append(1);
         }
         query.append(";");
-        Collection<JSONObject> products = jdbcTemplate.query(query.toString(), new RowMapper<JSONObject>() {
-            @Override
-            public JSONObject mapRow(ResultSet rs, int i) throws SQLException {
-                JSONObject products = new JSONObject();
-                products.put("productId", rs.getInt(1));
-                products.put("name", rs.getString(2));
-                products.put("description", rs.getString(3));
-                products.put("seller", rs.getString(4));
-                products.put("price", rs.getDouble(5));
-                products.put("primeEligible", rs.getBoolean(6));
-                products.put("stock", rs.getInt(7));
-                products.put("category", rs.getInt(8));
-                products.put("image", rs.getString(9));
-                return products;
-            }
+        Collection<JSONObject> products = jdbcTemplate.query(query.toString(), (rs, i) -> {
+            JSONObject products1 = new JSONObject();
+            products1.put("productId", rs.getInt(1));
+            products1.put("name", rs.getString(2));
+            products1.put("description", rs.getString(3));
+            products1.put("seller", rs.getString(4));
+            products1.put("price", rs.getDouble(5));
+            products1.put("primeEligible", rs.getBoolean(6));
+            products1.put("stock", rs.getInt(7));
+            products1.put("category", rs.getInt(8));
+            products1.put("image", rs.getString(9));
+            return products1;
         });
         response.setData(products.toString());
         return response;
@@ -467,16 +469,16 @@ public class Service {
 
     public ResponseObject fetchCartItems(int accountId) {
         ResponseObject response = new ResponseObject();
-        StringBuilder query = new StringBuilder();
-        query.append("SELECT cart.CartItemId, cart.Price, cart.Quantity, p.Stock, p.PrimeEligible, p.Description, p.Name, p.Seller, x.Image, p.PID " +
+        String query = "SELECT cart.CartItemId, cart.Price, cart.Quantity, p.Stock, p.PrimeEligible, p.Description, p.Name, p.Seller, x.Image, p.PID " +
                 "FROM CartItem cart " +
                 "    INNER JOIN Product P " +
                 "        on cart.PID = P.PID inner join (select * from (SELECT t1.PID, t2.Image, " +
                 "                                                              ROW_NUMBER() OVER(PARTITION BY t1.PID ORDER BY t2.PIID) AS Row " +
                 "                                                       FROM Product t1 LEFT JOIN ProductImages t2 ON t1.PID = t2.PID) as X where Row = 1) x " +
                 "            on cart.PID = x.PID " +
-                "WHERE AccountID=").append(accountId).append(";");
-        Collection<JSONObject> products = jdbcTemplate.query(query.toString(), (rs, i) -> {
+                "WHERE AccountID=" +
+                accountId + ";";
+        Collection<JSONObject> products = jdbcTemplate.query(query, (rs, i) -> {
             JSONObject products1 = new JSONObject();
             products1.put("cartItemId", rs.getInt(1));
             products1.put("price", rs.getDouble(2));

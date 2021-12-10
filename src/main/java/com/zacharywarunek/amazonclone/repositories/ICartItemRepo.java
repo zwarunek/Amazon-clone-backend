@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 
-public interface ICartItemRepo extends IJPABaseRepo<CartItem, String> {
+public interface ICartItemRepo extends IJPABaseRepo<CartItem> {
 
     @Query(value = "SELECT * FROM CartItem WHERE AccountID=?", nativeQuery = true)
     Collection<CartItem> fetchCartItemsByAccountID(int accountID);
