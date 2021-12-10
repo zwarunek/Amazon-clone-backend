@@ -8,11 +8,11 @@
         <version>2.4.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.zacharywarunek.kettering</groupId>
-    <artifactId>cs461-project-back</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>cs461-project-back</name>
-    <description>Backend Server for CS461 Main Project</description>
+    <groupId>com.zacharywarunek.amazonclone</groupId>
+    <artifactId>amazon-clone-backend</artifactId>
+    <version>0.0.1</version>
+    <name>amazon-clone-backend</name>
+    <description>Backend Server for Amazon clone</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
