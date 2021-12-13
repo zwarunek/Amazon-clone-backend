@@ -9,11 +9,11 @@ import java.util.Collection;
 
 public interface IAddressRepo extends IJPABaseRepo<Address> {
 
-    @Query(value = "SELECT * FROM Address where AccountId = ? order by Favorite DESC", nativeQuery = true)
-    Collection<Address> fetchAllAddressesByAccountId(int accountId);
+    @Query(value = "SELECT * FROM address where account_id = ? order by favorite DESC", nativeQuery = true)
+    Collection<Address> fetchAllAddressesByAccountId(int account_id);
 
 
-    @Query(value = "delete FROM Address where AddressId = ?", nativeQuery = true)
+    @Query(value = "delete FROM address where id = ?", nativeQuery = true)
     @Modifying
-    void deleteAddressById(int addressId);
+    void deleteAddressById(int id);
 }

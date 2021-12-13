@@ -1,6 +1,6 @@
 package com.zacharywarunek.amazonclone.config;
 
-import com.zacharywarunek.amazonclone.service.CustomUserDetailsService;
+import com.zacharywarunek.amazonclone.account.AccountService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +15,12 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private AccountService accountService;
 
     @Autowired
     private JwtUtil jwtTokenUtil;
@@ -47,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = accountService.loadUserByUsername(username);
 
             if (jwtTokenUtil.validateToken(authToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));

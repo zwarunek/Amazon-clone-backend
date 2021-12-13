@@ -9,11 +9,11 @@ import java.util.Collection;
 
 public interface IPaymentMethodRepo extends IJPABaseRepo<PaymentMethod> {
 
-    @Query(value = "SELECT * FROM PaymentMethod where AccountId = ?", nativeQuery = true)
-    Collection<PaymentMethod> fetchAllPaymentMethods(int accountId);
+    @Query(value = "SELECT * FROM payment_method where account_id = ?", nativeQuery = true)
+    Collection<PaymentMethod> fetchAllPaymentMethods(int account_id);
 
 
     @Modifying
-    @Query(value = "delete FROM PaymentMethod where PMID = ?", nativeQuery = true)
-    void deletePaymentMethodById(int pmid);
+    @Query(value = "delete FROM payment_method where id = ?", nativeQuery = true)
+    void deletePaymentMethodById(int id);
 }

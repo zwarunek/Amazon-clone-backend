@@ -9,10 +9,10 @@ import java.util.Collection;
 
 public interface ICartItemRepo extends IJPABaseRepo<CartItem> {
 
-    @Query(value = "SELECT * FROM CartItem WHERE AccountID=?", nativeQuery = true)
-    Collection<CartItem> fetchCartItemsByAccountID(int accountID);
+    @Query(value = "SELECT * FROM cart_item WHERE account_id=?", nativeQuery = true)
+    Collection<CartItem> fetchCartItemsByAccountID(int account_id);
 
     @Modifying
-    @Query(value = "UPDATE CartItem SET Quantity=? WHERE CartItemID=? ", nativeQuery = true)
-    void changeQuantity( int newQuantity, int shoppingCartID);
+    @Query(value = "UPDATE cart_item SET quantity=? WHERE id=? ", nativeQuery = true)
+    void changeQuantity( int quantity, int id);
 }

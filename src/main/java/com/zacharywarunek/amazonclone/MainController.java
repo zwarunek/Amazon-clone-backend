@@ -3,7 +3,15 @@ package com.zacharywarunek.amazonclone;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class MainController {
@@ -27,13 +35,19 @@ public class MainController {
     public ResponseObject register(@RequestBody String payloadFromUI){
         return service.Register(payloadFromUI);
     }
-    @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
-    public ResponseObject login(@RequestBody AuthRequest payloadFromUI) {
-        return service.Authenticate(payloadFromUI);
-    }
+//    @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+//    public ResponseObject login(@RequestBody AuthRequest payloadFromUI) {
+//        return service.Authenticate(payloadFromUI);
+//    }
     @RequestMapping(value = "/checkAccountExists", method = RequestMethod.GET)
-    public ResponseObject checkAccountExists(@RequestParam String email){
-        return service.checkAccountExists(email);
+    @GetMapping
+    public ResponseEntity<Object> checkAccountExists(@RequestParam String email){
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(
+                new HashMap<>().put("exists", Boolean.toString(service.checkAccountExists(email))),
+                httpHeaders,
+                HttpStatus.FOUND);
     }
     @RequestMapping(value = "/getProduct", method = RequestMethod.GET)
     public ResponseObject getProduct(@RequestParam int productId){
@@ -56,20 +70,20 @@ public class MainController {
     public ResponseObject getAllCategories(){
         return service.getAllCategories();
     }
-    @RequestMapping(value = "/changePrimeMembership", method = RequestMethod.POST)
-    public ResponseObject getAllCategories(@RequestBody String payloadFromUI){
-        JSONObject jsonPayload = new JSONObject(payloadFromUI);
-        return service.changePrimeMembership(!jsonPayload.getBoolean("member"), jsonPayload.getInt("accountId"));
-    }
-    @RequestMapping(value = "/changeAccountDetails", method = RequestMethod.POST)
-    public ResponseObject changeAccountDetails(@RequestBody String payloadFromUI){
-        JSONObject jsonPayload = new JSONObject(payloadFromUI);
-        return service.changeAccountDetails(jsonPayload);
-    }
-    @RequestMapping(value = "/checkPassword", method = RequestMethod.POST)
-    public ResponseObject checkPassword(@RequestBody AuthRequest payloadFromUI){
-        return service.checkPassword(payloadFromUI);
-    }
+//    @RequestMapping(value = "/changePrimeMembership", method = RequestMethod.POST)
+//    public ResponseObject getAllCategories(@RequestBody String payloadFromUI){
+//        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+//        return service.changePrimeMembership(!jsonPayload.getBoolean("member"), jsonPayload.getInt("accountId"));
+//    }
+//    @RequestMapping(value = "/changeAccountDetails", method = RequestMethod.POST)
+//    public ResponseObject changeAccountDetails(@RequestBody String payloadFromUI){
+//        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+//        return service.changeAccountDetails(jsonPayload);
+//    }
+//    @RequestMapping(value = "/checkPassword", method = RequestMethod.POST)
+//    public ResponseObject checkPassword(@RequestBody AuthRequest payloadFromUI){
+//        return service.checkPassword(payloadFromUI);
+//    }
     @RequestMapping(value = "/savePaymentMethod", method = RequestMethod.POST)
     public ResponseObject savePaymentMethod(@RequestBody String  payload){
         JSONObject json = new JSONObject(payload);

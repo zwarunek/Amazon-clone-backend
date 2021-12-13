@@ -8,6 +8,6 @@ import java.util.Collection;
 
 public interface ICategoryRepo extends IJPABaseRepo<Category> {
 
-    @Query(value = "SELECT * FROM Category", nativeQuery = true)
+    @Query(value = "SELECT * FROM category", nativeQuery = true)
     Collection<Category> fetchAllCategories();
 }

@@ -8,6 +8,6 @@ import java.util.Collection;
 
 public interface IPaymentTypeRepo extends IJPABaseRepo<PaymentType> {
 
-    @Query(value = "SELECT * FROM PaymentType", nativeQuery = true)
+    @Query(value = "SELECT * FROM payment_type", nativeQuery = true)
     Collection<PaymentType> fetchAllPaymentTypes();
 }

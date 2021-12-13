@@ -1,26 +1,22 @@
 package com.zacharywarunek.amazonclone;
 
+import com.zacharywarunek.amazonclone.account.AccountRepo;
+import com.zacharywarunek.amazonclone.account.AccountService;
 import com.zacharywarunek.amazonclone.config.JwtUtil;
 import com.zacharywarunek.amazonclone.entitys.*;
 import com.zacharywarunek.amazonclone.repositories.*;
-import com.zacharywarunek.amazonclone.service.CustomUserDetailsService;
-import com.zacharywarunek.amazonclone.util.AuthRequest;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
 public class Service {
 
-    IAccountRepo accountRepo;
+    AccountRepo accountRepo;
 
     ICategoryRepo categoryRepo;
 
@@ -40,10 +36,10 @@ public class Service {
 
     JdbcTemplate jdbcTemplate;
 
-    private final CustomUserDetailsService userDetailsService;
+    private final AccountService accountService;
 
     @Autowired
-    public Service(IAccountRepo accountRepo,
+    public Service(AccountRepo accountRepo,
                    ICategoryRepo categoryRepo,
                    IProductImagesRepo productImagesRepo,
                    IProductRepo productRepo,
@@ -53,7 +49,7 @@ public class Service {
                    ICartItemRepo cartItemRepo,
                    JwtUtil jwtUtil,
                    JdbcTemplate jdbcTemplate,
-                   CustomUserDetailsService userDetailsService){
+                   AccountService accountService){
         this.accountRepo = accountRepo;
         this.categoryRepo = categoryRepo;
         this.productImagesRepo = productImagesRepo;
@@ -64,54 +60,54 @@ public class Service {
         this.cartItemRepo = cartItemRepo;
         this.jwtUtil = jwtUtil;
         this.jdbcTemplate = jdbcTemplate;
-        this.userDetailsService = userDetailsService;
+        this.accountService = accountService;
     }
 
     public ResponseObject Register(String payloadFromUI){
         ResponseObject response = new ResponseObject();
-        JSONObject jsonPayload = new JSONObject(payloadFromUI);
-        jsonPayload.put("primeMember", false);
-        Account account = new Account();
-        try {
-
-            account = account.constructEntity(jsonPayload.getString("firstName"), jsonPayload.getString("lastName"),hashPassword(jsonPayload.getString("password")),jsonPayload.getBoolean("primeMember"),jsonPayload.getString("email"));
-            accountRepo.save(account);
-            response.setStatus(200);
-            response.setMessage("Account has been created");
-            response.setData("Account has been created for " + account.getFirstName() + " " + account.getLastName());
-        }
-        catch (Exception e){
+//        JSONObject jsonPayload = new JSONObject(payloadFromUI);
+//        jsonPayload.put("primeMember", false);
+//        Account account = new Account();
+//        try {
+//
+//            account = account.constructEntity(jsonPayload.getString("firstName"), jsonPayload.getString("lastName"),hashPassword(jsonPayload.getString("password")),jsonPayload.getString("email"));
+//            accountRepo.save(account);
+//            response.setStatus(200);
+//            response.setMessage("Account has been created");
+//            response.setData("Account has been created for " + account.getFirst_name() + " " + account.getLast_name());
+//        }
+//        catch (Exception e){
             response.setStatus(411);
             response.setMessage("An error occurred when creating your account");
-            response.setData("An error occurred when creating an account :  " + e.getMessage());
-        }
+            response.setData("An error occurred when creating an account");
+//        }
         return response;
     }
-    public ResponseObject Authenticate(AuthRequest payloadFromUI){
-        ResponseObject response = new ResponseObject();
-        Account account;
-        try {
-
-            account = accountRepo.fetchAccountByEmail(payloadFromUI.getEmail());
-            if(account != null && checkPassword(payloadFromUI.getPassword(), account.getPassword())){
-                UserDetails userdetails = userDetailsService.loadUserByUsername(payloadFromUI.getEmail());
-                account.setToken(jwtUtil.generateToken(userdetails));
-                response.setStatus(200);
-                response.setMessage("You are now logged in");
-                response.setData(account);
-            }
-            else{
-                response.setStatus(403);
-                response.setMessage("Email or Password was incorrect");
-            }
-        }
-        catch (Exception e){
-            response.setStatus(411);
-            response.setMessage("An error occurred when authenticating your account");
-            response.setData("An error occurred when creating an account :  " + e.getMessage());
-        }
-        return response;
-    }
+//    public ResponseObject Authenticate(AuthRequest payloadFromUI){
+//        ResponseObject response = new ResponseObject();
+//        Account account;
+//        try {
+//
+//            account = accountRepo.findAccountByEmail(payloadFromUI.getEmail());
+//            if(account != null && checkPassword(payloadFromUI.getPassword(), account.getPassword())){
+//                UserDetails userdetails = userDetailsService.loadUserByUsername(payloadFromUI.getEmail());
+//                account.setToken(jwtUtil.generateToken(userdetails));
+//                response.setStatus(200);
+//                response.setMessage("You are now logged in");
+//                response.setData(account);
+//            }
+//            else{
+//                response.setStatus(403);
+//                response.setMessage("Email or Password was incorrect");
+//            }
+//        }
+//        catch (Exception e){
+//            response.setStatus(411);
+//            response.setMessage("An error occurred when authenticating your account");
+//            response.setData("An error occurred when creating an account :  " + e.getMessage());
+//        }
+//        return response;
+//    }
     private String hashPassword(String password) {
         int workload = 12;
         String salt = BCrypt.gensalt(workload);
@@ -188,65 +184,61 @@ public class Service {
         return response;
     }
 
-    public ResponseObject checkAccountExists(String email) {
-        ResponseObject response = new ResponseObject();
-        boolean exists = accountRepo.checkIfExists(email);
-        response.setStatus(200);
-        response.setData(exists);
-        return response;
+    public boolean checkAccountExists(String email) {
+        return accountRepo.checkIfEmailExists(email);
 
     }
 
-    public ResponseObject changePrimeMembership(boolean member, int accountId) {
-        ResponseObject response = new ResponseObject();
-        accountRepo.changePrimeMembership(member, accountId);
-        response.setStatus(200);
-        response.setData(accountRepo.fetchAccountByAccountId(accountId));
-        return response;
-    }
-    public ResponseObject changeAccountDetails(JSONObject jsonPayload){
-        ResponseObject response = new ResponseObject();
-        boolean updatePassword = jsonPayload.getBoolean("updatePassword");
-        String password = updatePassword?hashPassword(jsonPayload.getString("password")): jsonPayload.getString("password");
-        Account account = new Account();
-        try {
+//    public ResponseObject changePrimeMembership(boolean member, int accountId) {
+//        ResponseObject response = new ResponseObject();
+//        accountRepo.changePrimeMembership(member, accountId);
+//        response.setStatus(200);
+//        response.setData(accountRepo.findAccountByAccountId(accountId));
+//        return response;
+//    }
+//    public ResponseObject changeAccountDetails(JSONObject jsonPayload){
+//        ResponseObject response = new ResponseObject();
+//        boolean updatePassword = jsonPayload.getBoolean("updatePassword");
+//        String password = updatePassword?hashPassword(jsonPayload.getString("password")): jsonPayload.getString("password");
+//        Account account = new Account();
+//        try {
+//
+//            account = account.constructEntity(jsonPayload.getString("firstName"), jsonPayload.getString("lastName"),password,jsonPayload.getBoolean("primeMember"),jsonPayload.getString("email"));
+//            account.setId(jsonPayload.getInt("accountId"));
+//            accountRepo.save(account);
+//            account.setToken(jsonPayload.getString("token"));
+//            response.setStatus(200);
+//            response.setMessage("Account has been updated");
+//            response.setData(account);
+//        }
+//        catch (Exception e){
+//            response.setStatus(411);
+//            response.setMessage("An error occurred when updating your account");
+//            response.setData("An error occurred when updating an account :  " + e.getMessage());
+//        }
+//        return response;
+//    }
 
-            account = account.constructEntity(jsonPayload.getString("firstName"), jsonPayload.getString("lastName"),password,jsonPayload.getBoolean("primeMember"),jsonPayload.getString("email"));
-            account.setAccountId(jsonPayload.getInt("accountId"));
-            accountRepo.save(account);
-            account.setToken(jsonPayload.getString("token"));
-            response.setStatus(200);
-            response.setMessage("Account has been updated");
-            response.setData(account);
-        }
-        catch (Exception e){
-            response.setStatus(411);
-            response.setMessage("An error occurred when updating your account");
-            response.setData("An error occurred when updating an account :  " + e.getMessage());
-        }
-        return response;
-    }
-
-    public ResponseObject checkPassword(AuthRequest payloadFromUI) {
-        ResponseObject response = new ResponseObject();
-        Account account;
-        try {
-
-            account = accountRepo.fetchAccountByEmail(payloadFromUI.getEmail());
-            if(account != null && checkPassword(payloadFromUI.getPassword(), account.getPassword())){
-                response.setStatus(200);
-            }
-            else{
-                response.setStatus(403);
-                response.setMessage("Current password was incorrect");
-            }
-        }
-        catch (Exception e){
-            response.setStatus(411);
-            response.setMessage("An error occurred when authenticating your password");
-        }
-        return response;
-    }
+//    public ResponseObject checkPassword(AuthRequest payloadFromUI) {
+//        ResponseObject response = new ResponseObject();
+//        Account account;
+//        try {
+//
+//            account = accountRepo.findAccountByEmail(payloadFromUI.getEmail());
+//            if(account != null && checkPassword(payloadFromUI.getPassword(), account.getPassword())){
+//                response.setStatus(200);
+//            }
+//            else{
+//                response.setStatus(403);
+//                response.setMessage("Current password was incorrect");
+//            }
+//        }
+//        catch (Exception e){
+//            response.setStatus(411);
+//            response.setMessage("An error occurred when authenticating your password");
+//        }
+//        return response;
+//    }
 
 
     public ResponseObject savePaymentMethod(JSONObject json){

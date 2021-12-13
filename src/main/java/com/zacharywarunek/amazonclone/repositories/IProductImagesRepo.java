@@ -8,6 +8,6 @@ import java.util.Collection;
 
 public interface IProductImagesRepo extends IJPABaseRepo<ProductImages> {
 
-    @Query(value = "SELECT Image FROM ProductImages WHERE PID=?", nativeQuery = true)
-    Collection<String> fetchProductImagesById(int productId);
+    @Query(value = "SELECT src FROM product_images WHERE product_id=?", nativeQuery = true)
+    Collection<String> fetchProductImagesById(int product_id);
 }
