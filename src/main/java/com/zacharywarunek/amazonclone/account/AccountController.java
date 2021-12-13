@@ -23,10 +23,6 @@ public class AccountController {
         return accountService.getAllAccounts();
     }
 
-//    @PostMapping(path = "/register")
-//    public ResponseEntity<Object> register(@RequestBody Account account){
-//        return accountService.register(account);
-//    }
     @PostMapping(path = "/authenticate")
     public ResponseEntity<Object> authenticate(@RequestBody AuthRequest authRequest){
         return accountService.authenticate(authRequest);
