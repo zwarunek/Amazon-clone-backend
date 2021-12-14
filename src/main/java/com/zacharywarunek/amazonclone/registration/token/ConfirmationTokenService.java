@@ -11,7 +11,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class ConfirmationTokenService {
 
-    private final ConfirmationTokenRepository confirmationTokenRepo;
+    private final ConfirmationTokenRepo confirmationTokenRepo;
 
     public void saveConfirmationToken(ConfirmationToken token) {
         confirmationTokenRepo.save(token);
@@ -21,8 +21,8 @@ public class ConfirmationTokenService {
         return confirmationTokenRepo.findByToken(token);
     }
 
-    public int setConfirmedAt(String token) {
-        return confirmationTokenRepo.updateConfirmedAt(
+    public void setConfirmedAt(String token) {
+        confirmationTokenRepo.updateConfirmedAt(
                 token, LocalDateTime.now());
     }
     public void deleteAllAtAccountId(Account account){

@@ -185,7 +185,7 @@ public class Service {
     }
 
     public boolean checkAccountExists(String email) {
-        return accountRepo.checkIfEmailExists(email);
+        return accountRepo.checkIfUsernameExists(email);
 
     }
 

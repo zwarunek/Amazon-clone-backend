@@ -43,7 +43,8 @@ public class Account implements UserDetails {
 
     @Override
     public String toString(){
-        return String.format("Account [id=%d, first_name=%s, last_name=%s, password=%s, email=%s]", id, first_name, last_name, password, username);
+        return String.format("Account [id=%d, first_name=%s, last_name=%s, password=%s, username=%s, role=%s, enabled=%b, locked=%b]",
+                id, first_name, last_name, password, username, role.name(), enabled, locked);
     }
 
 

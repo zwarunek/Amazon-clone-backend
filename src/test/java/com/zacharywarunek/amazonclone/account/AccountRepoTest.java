@@ -26,12 +26,12 @@ class AccountRepoTest {
         Account account = new Account(
                 "Zach",
                 "Warunek",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
                 email,
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
                 AccountRole.USER
         );
         accountRepo.save(account);
-        Optional<Account> accountOptional = accountRepo.findAccountByEmail(email);
+        Optional<Account> accountOptional = accountRepo.findAccountByUsername(email);
         assertTrue(accountOptional.isPresent());
         assertEquals(account, accountOptional.get());
     }
@@ -41,12 +41,12 @@ class AccountRepoTest {
         Account account = new Account(
                 "Zach",
                 "Warunek",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
                 "Zach@gmail.com",
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
                 AccountRole.USER
         );
         accountRepo.save(account);
-        Optional<Account> accountOptional = accountRepo.findAccountByEmail("notInDatabase@gmail.com");
+        Optional<Account> accountOptional = accountRepo.findAccountByUsername("notInDatabase@gmail.com");
         assertFalse(accountOptional.isPresent());
     }
 
@@ -56,13 +56,13 @@ class AccountRepoTest {
         Account account = new Account(
                 "Zach",
                 "Warunek",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
                 email,
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
                 AccountRole.USER
         );
         accountRepo.save(account);
 
-        assertTrue(accountRepo.checkIfEmailExists(email));
+        assertTrue(accountRepo.checkIfUsernameExists(email));
     }
 
     @Test
@@ -76,6 +76,24 @@ class AccountRepoTest {
         );
         accountRepo.save(account);
 
-        assertFalse(accountRepo.checkIfEmailExists("notInDatabase@gmail.com"));
+        assertFalse(accountRepo.checkIfUsernameExists("notInDatabase@gmail.com"));
+    }
+
+    @Test
+    void enableAccount() {
+        Account account = new Account(
+                "Zach",
+                "Warunek",
+                "za@gmail.com",
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
+                AccountRole.USER
+        );
+        accountRepo.save(account);
+        accountRepo.enableAccount(account.getUsername());
+
+        Optional<Account> accountOptional = accountRepo.findById(account.getId());
+
+        assertTrue(accountOptional.isPresent());
+        assertTrue(accountOptional.get().isEnabled());
     }
 }

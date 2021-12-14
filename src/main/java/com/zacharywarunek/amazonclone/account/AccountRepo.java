@@ -10,18 +10,18 @@ import java.util.Optional;
 public interface AccountRepo extends IJPABaseRepo<Account> {
 
     @Query(value = "SELECT * FROM Account WHERE username=?", nativeQuery = true)
-    Optional<Account> findAccountByEmail(String email);
+    Optional<Account> findAccountByUsername(String username);
 
     @Query(value = "SELECT CAST(" +
             "               CASE WHEN EXISTS(SELECT * FROM Account where username like ?) THEN 1" +
             "                    ELSE 0" +
             "                   END" +
             "           AS BIT)", nativeQuery = true)
-    boolean checkIfEmailExists(String email);
+    boolean checkIfUsernameExists(String username);
 
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
     @Query("UPDATE Account a " +
             "SET a.enabled = TRUE WHERE a.username = ?1")
-    void enableAccount(String email);
+    int enableAccount(String username);
 }
