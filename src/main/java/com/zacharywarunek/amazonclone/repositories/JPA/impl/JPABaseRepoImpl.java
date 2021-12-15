@@ -7,12 +7,12 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import javax.persistence.EntityManager;
 import java.io.Serializable;
 
-public class JPABaseRepoImpl <T> extends SimpleJpaRepository<T, Serializable> implements IJPABaseRepo<T> {
+public class JPABaseRepoImpl<T> extends SimpleJpaRepository<T, Serializable> implements IJPABaseRepo<T> {
 
     private final JpaEntityInformation<T, ?> entityInformation;
     private final EntityManager entityManager;
 
-    public JPABaseRepoImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager){
+    public JPABaseRepoImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
         super(entityInformation, entityManager);
         this.entityInformation = entityInformation;
         this.entityManager = entityManager;
@@ -20,11 +20,9 @@ public class JPABaseRepoImpl <T> extends SimpleJpaRepository<T, Serializable> im
 
     @Override
     public <S extends T> S save(S entity) {
-        if(entityInformation.isNew(entity)){
+        if(entityInformation.isNew(entity)) {
             entityManager.persist(entity);
             return entity;
-        }
-        else
-            return entityManager.merge(entity);
+        } else return entityManager.merge(entity);
     }
 }

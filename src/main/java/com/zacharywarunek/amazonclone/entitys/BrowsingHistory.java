@@ -1,7 +1,9 @@
 package com.zacharywarunek.amazonclone.entitys;
 
 //TODO Create Browsing History table in database
+
 import javax.persistence.*;
+
 @Entity
 @Table(name = "BrowsingHistory")
 public class BrowsingHistory {
@@ -11,13 +13,17 @@ public class BrowsingHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
-    @Column(name = "AccountID") private int accountID;
+    @Column(name = "AccountID")
+    private int accountID;
 
-    @Column(name = "ProductID") private int productID;
+    @Column(name = "ProductID")
+    private int productID;
 
-    @Column(name = "TimesViewed") private int timesViewed;
+    @Column(name = "TimesViewed")
+    private int timesViewed;
 
-    @Column(name = "MostRecentView") private int recentView;
+    @Column(name = "MostRecentView")
+    private int recentView;
 
 
     public BrowsingHistory constructEntity(int accountID, int productID, int timesViewed, int recentView) {
@@ -30,31 +36,40 @@ public class BrowsingHistory {
     }
 
     @Override
-    public String toString(){
-        return String.format("Address [accountID=%d, productID=%d, timesViewed=%d, recentView=%d]", accountID, productID, timesViewed, recentView);
+    public String toString() {
+        return String.format("Address [accountID=%d, productID=%d, timesViewed=%d, recentView=%d]", accountID,
+                productID, timesViewed, recentView);
     }
-    public int getAccountID(){
+
+    public int getAccountID() {
         return accountID;
     }
-    public void setAccountID(int accountID){
-        this.accountID =accountID;
+
+    public void setAccountID(int accountID) {
+        this.accountID = accountID;
     }
-    public int getProductID(){
+
+    public int getProductID() {
         return productID;
     }
-    public void setProductID(int productID){
-        this.productID =productID;
+
+    public void setProductID(int productID) {
+        this.productID = productID;
     }
-    public int getTimesViewed(){
+
+    public int getTimesViewed() {
         return timesViewed;
     }
-    public void setTimesViewed(int timesViewed){
+
+    public void setTimesViewed(int timesViewed) {
         this.timesViewed = timesViewed;
     }
-    public int getRecentView(){
+
+    public int getRecentView() {
         return recentView;
     }
-    public void setRecentView(int recentView){
+
+    public void setRecentView(int recentView) {
         this.recentView = recentView;
     }
 }

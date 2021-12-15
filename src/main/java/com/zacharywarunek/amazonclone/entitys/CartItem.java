@@ -1,6 +1,7 @@
 package com.zacharywarunek.amazonclone.entitys;
 
 import javax.persistence.*;
+
 @Entity
 @Table(name = "CartItem")
 public class CartItem {
@@ -15,7 +16,7 @@ public class CartItem {
     private int accountID;
 
     @Column(name = "PID")
-    private  int productId;
+    private int productId;
 
     @Column(name = "Quantity")
     private int quantity;

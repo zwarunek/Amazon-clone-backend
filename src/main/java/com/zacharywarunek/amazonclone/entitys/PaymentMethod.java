@@ -27,7 +27,8 @@ public class PaymentMethod {
     @Column(name = "Favorite")
     private boolean favorite;
 
-    public PaymentMethod constructEntity(int accountId, int addressId, int typeId, String nameOnCard, String cardNumber, String exp, String cvv) {
+    public PaymentMethod constructEntity(int accountId, int addressId, int typeId, String nameOnCard, String cardNumber,
+                                         String exp, String cvv) {
         PaymentMethod paymentMethod = new PaymentMethod();
         paymentMethod.setAccountId(accountId);
         paymentMethod.setAddressId(addressId);
@@ -42,7 +43,8 @@ public class PaymentMethod {
 
     @Override
     public String toString() {
-        return String.format("Account [accountId=%d, firstName=%s, lastName=%s, password=%s, primeMember=%b, email=%s]", pmId, pmId, typeId, nameOnCard, cardNumber, exp);
+        return String.format("Account [accountId=%d, firstName=%s, lastName=%s, password=%s, primeMember=%b, email=%s]",
+                pmId, pmId, typeId, nameOnCard, cardNumber, exp);
     }
 
     public String getExp() {

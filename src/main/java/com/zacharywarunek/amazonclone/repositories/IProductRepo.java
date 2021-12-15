@@ -8,9 +8,9 @@ import java.util.Collection;
 
 public interface IProductRepo extends IJPABaseRepo<Product> {
 
-    @Query(value = "SELECT * FROM Product", nativeQuery = true)
+    @Query(value = "SELECT * FROM product", nativeQuery = true)
     Collection<Product> fetchAllProducts();
 
-    @Query(value = "SELECT * FROM Product WHERE PID=?", nativeQuery = true)
-    Product fetchProductById(int productId);
+    @Query(value = "SELECT * FROM product WHERE id=?", nativeQuery = true)
+    Product fetchProductById(int id);
 }
