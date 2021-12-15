@@ -1,8 +1,11 @@
 package com.zacharywarunek.amazonclone.account;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,8 +46,8 @@ public class Account implements UserDetails {
 
     @Override
     public String toString(){
-        return String.format("Account [id=%d, first_name=%s, last_name=%s, password=%s, username=%s, role=%s, enabled=%b, locked=%b]",
-                id, first_name, last_name, password, username, role.name(), enabled, locked);
+        return String.format("Account [id=%s, first_name=%s, last_name=%s, password=%s, username=%s, role=%s, enabled=%s, locked=%s]",
+                id, first_name, last_name, password, username, role != null ? role.name() : null, enabled, locked);
     }
 
 
