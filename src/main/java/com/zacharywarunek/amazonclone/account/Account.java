@@ -1,11 +1,8 @@
 package com.zacharywarunek.amazonclone.account;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +18,7 @@ import java.util.Collections;
 public class Account implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String first_name;
     private String last_name;
@@ -32,9 +29,6 @@ public class Account implements UserDetails {
     private Boolean locked = false;
     private Boolean enabled = false;
 
-    @Transient
-    private String token;
-
     public Account(String first_name, String last_name, String username, String password, AccountRole role) {
         this.first_name = first_name;
         this.last_name = last_name;
@@ -43,13 +37,12 @@ public class Account implements UserDetails {
         this.role = role;
     }
 
-
     @Override
-    public String toString(){
-        return String.format("Account [id=%s, first_name=%s, last_name=%s, password=%s, username=%s, role=%s, enabled=%s, locked=%s]",
+    public String toString() {
+        return String.format(
+                "Account [id=%s, first_name=%s, last_name=%s, password=%s, username=%s, role=%s, enabled=%s, locked=%s]",
                 id, first_name, last_name, password, username, role != null ? role.name() : null, enabled, locked);
     }
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -77,7 +70,7 @@ public class Account implements UserDetails {
     }
 
     @Override
-        public boolean isEnabled() {
-            return enabled;
+    public boolean isEnabled() {
+        return enabled;
     }
 }

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class ConfirmationToken {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String token;
@@ -31,10 +31,7 @@ public class ConfirmationToken {
     @JoinColumn(name = "account_id")
     private Account account;
 
-    public ConfirmationToken(String token,
-                             LocalDateTime created_at,
-                             LocalDateTime expires_at,
-                             Account account) {
+    public ConfirmationToken(String token, LocalDateTime created_at, LocalDateTime expires_at, Account account) {
         this.token = token;
         this.created_at = created_at;
         this.expires_at = expires_at;

@@ -31,21 +31,12 @@ class ConfirmationTokenRepoTest {
 
     @Test
     void findByToken() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                account
-        );
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
         confirmationTokenRepo.save(confirmationToken);
         Optional<ConfirmationToken> confirmationTokenOptional = confirmationTokenRepo.findByToken(token);
         assertTrue(confirmationTokenOptional.isPresent());
@@ -54,43 +45,26 @@ class ConfirmationTokenRepoTest {
 
     @Test
     void findByTokenNotFound() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                account
-        );
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
         confirmationTokenRepo.save(confirmationToken);
-        Optional<ConfirmationToken> confirmationTokenOptional = confirmationTokenRepo.findByToken(UUID.randomUUID().toString());
+        Optional<ConfirmationToken> confirmationTokenOptional =
+                confirmationTokenRepo.findByToken(UUID.randomUUID().toString());
         assertFalse(confirmationTokenOptional.isPresent());
     }
 
     @Test
     void updateConfirmedAt() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                account
-        );
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
         confirmationTokenRepo.save(confirmationToken);
         LocalDateTime now = LocalDateTime.now();
         confirmationTokenRepo.updateConfirmedAt(token, now);
@@ -104,21 +78,12 @@ class ConfirmationTokenRepoTest {
 
     @Test
     void deleteAllByAccountId() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                account
-        );
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
         confirmationTokenRepo.save(confirmationToken);
         confirmationTokenRepo.deleteAllByAccountId(account);
         List<ConfirmationToken> tokens = confirmationTokenRepo.findAll();

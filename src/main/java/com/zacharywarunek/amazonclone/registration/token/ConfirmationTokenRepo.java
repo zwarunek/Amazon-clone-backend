@@ -12,20 +12,17 @@ import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
-public interface ConfirmationTokenRepo
-        extends JpaRepository<ConfirmationToken, Long> {
+public interface ConfirmationTokenRepo extends JpaRepository<ConfirmationToken, Long> {
 
     Optional<ConfirmationToken> findByToken(String token);
 
     @Transactional
-    @Modifying(clearAutomatically=true, flushAutomatically=true)
-    @Query("UPDATE ConfirmationToken c " +
-            "SET c.confirmed_at = ?2 " +
-            "WHERE c.token = ?1")
-    void updateConfirmedAt(String token,
-                          LocalDateTime confirmedAt);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE ConfirmationToken c " + "SET c.confirmed_at = ?2 " + "WHERE c.token = ?1")
+    void updateConfirmedAt(String token, LocalDateTime confirmedAt);
+
     @Transactional
-    @Modifying(clearAutomatically=true, flushAutomatically=true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ConfirmationToken WHERE account = ?1")
     int deleteAllByAccountId(Account account);
 }

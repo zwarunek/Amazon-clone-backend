@@ -1,10 +1,11 @@
 package com.zacharywarunek.amazonclone.repositories;
 
-import com.zacharywarunek.amazonclone.repositories.JPA.IJPABaseRepo;
 import com.zacharywarunek.amazonclone.entitys.OrderHistory;
+import com.zacharywarunek.amazonclone.repositories.JPA.IJPABaseRepo;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
+
 //TODO Create Order History table in database
 public interface IOrderHistoryRepo extends IJPABaseRepo<OrderHistory> {
     @Query(value = "SELECT * FROM OrderHistory", nativeQuery = true)

@@ -12,7 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,12 +33,8 @@ class ConfirmationTokenServiceTest {
 
         String token = UUID.randomUUID().toString();
         Account account = new Account();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                account
-        );
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
         ArgumentCaptor<ConfirmationToken> accountArgumentCaptor = ArgumentCaptor.forClass(ConfirmationToken.class);
@@ -84,13 +81,7 @@ class ConfirmationTokenServiceTest {
     @Test
     void deleteAllAtAccountId() {
 
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "password1234",
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
         account.setId(5);
         confirmationTokenService.deleteAllAtAccountId(account);
 

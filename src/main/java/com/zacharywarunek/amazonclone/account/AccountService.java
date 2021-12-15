@@ -24,13 +24,14 @@ import java.util.*;
 @Service
 public class AccountService implements UserDetailsService {
 
-    AccountRepo accountRepo;
-    JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
+    AccountRepo accountRepo;
+    JwtUtil jwtUtil;
 
     @Autowired
-    public AccountService(AccountRepo accountRepo, JwtUtil jwtUtil,  PasswordEncoder passwordEncoder,  ConfirmationTokenService confirmationTokenService){
+    public AccountService(AccountRepo accountRepo, JwtUtil jwtUtil, PasswordEncoder passwordEncoder,
+                          ConfirmationTokenService confirmationTokenService) {
         this.accountRepo = accountRepo;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
@@ -38,43 +39,36 @@ public class AccountService implements UserDetailsService {
     }
 
 
-    public List<Account> getAllAccounts(){
+    public List<Account> getAllAccounts() {
         return accountRepo.findAll();
     }
-    public String register(Account account){
-        if(account.getPassword() == null ||
-                account.getUsername() == null ||
-                account.getLast_name() == null ||
-                account.getFirst_name() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "An error occurred when creating the account: Null values present");
-        if (accountRepo.checkIfUsernameExists(account.getUsername()))
+
+    public String register(Account account) {
+        if(account.getPassword() == null || account.getUsername() == null || account.getLast_name() == null ||
+                account.getFirst_name() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "An error occurred when creating the account: Null values present");
+        if(accountRepo.checkIfUsernameExists(account.getUsername()))
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "An account with that email " + account.getUsername() + " already exists");
 
         account.setPassword(passwordEncoder.encode(account.getPassword()));
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
-                account
-        );
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
 
         confirmationTokenService.saveConfirmationToken(confirmationToken);
 
         return token;
     }
 
-    public ResponseEntity<Object> authenticate(AuthRequest authRequest){
-        if (authRequest.getUsername() == null || authRequest.getPassword() == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "'username' or 'password' fields not found");
+    public ResponseEntity<Object> authenticate(AuthRequest authRequest) {
+        if(authRequest.getUsername() == null || authRequest.getPassword() == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'username' or 'password' fields not found");
         Optional<Account> accountOptional = accountRepo.findAccountByUsername(authRequest.getUsername());
-        if(!accountOptional.isPresent() || !passwordEncoder.matches(authRequest.getPassword(), accountOptional.get().getPassword()))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "Username or Password was incorrect");
+        if(!accountOptional.isPresent() ||
+                !passwordEncoder.matches(authRequest.getPassword(), accountOptional.get().getPassword()))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username or Password was incorrect");
         Account account = accountOptional.get();
         HttpHeaders headers = new HttpHeaders();
         String token = jwtUtil.generateToken(account);
@@ -86,14 +80,12 @@ public class AccountService implements UserDetailsService {
     public ResponseEntity<Object> updateAccount(int account_id, Account accountDetails) {
         Optional<Account> accountOptional = accountRepo.findById(account_id);
         if(!accountOptional.isPresent())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Account with id " + account_id + " doesn't exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with id " + account_id + " doesn't exist");
         Account account = accountOptional.get();
-        if (accountDetails.getUsername() != null && !accountDetails.getUsername().equals(account.getUsername()))
+        if(accountDetails.getUsername() != null && !accountDetails.getUsername().equals(account.getUsername()))
             if(accountRepo.findAccountByUsername(accountDetails.getUsername()).isPresent())
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Username is already in use");
-        if (accountDetails.getPassword() != null)
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already in use");
+        if(accountDetails.getPassword() != null)
             accountDetails.setPassword(passwordEncoder.encode(accountDetails.getPassword()));
 
         BeansUtil<Account> beansUtil = new BeansUtil<>();
@@ -108,8 +100,7 @@ public class AccountService implements UserDetailsService {
     public void deleteAccount(int account_id) {
         Optional<Account> account = accountRepo.findById(account_id);
         if(!account.isPresent())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Account with id " + account_id + " doesn't exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with id " + account_id + " doesn't exist");
         confirmationTokenService.deleteAllAtAccountId(account.get());
         accountRepo.deleteById(account.get().getId());
     }
@@ -119,14 +110,12 @@ public class AccountService implements UserDetailsService {
         Optional<Account> account = accountRepo.findAccountByUsername(username);
         if(account.isPresent())
             return new User(account.get().getUsername(), account.get().getPassword(), account.get().getAuthorities());
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Account with username " + username + " doesn't exist");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with username " + username + " doesn't exist");
     }
 
     public void enableAccount(String username) {
-        if (!accountRepo.checkIfUsernameExists(username))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Account with username " + username + " doesn't exist");
+        if(!accountRepo.checkIfUsernameExists(username)) throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Account with username " + username + " doesn't exist");
         accountRepo.enableAccount(username);
     }
 }

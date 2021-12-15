@@ -7,7 +7,7 @@ import javax.persistence.*;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID")
     private int productId;
     @Column(name = "Name")
@@ -25,7 +25,8 @@ public class Product {
     @Column(name = "Category")
     private int category;
 
-    public Product constructEntity(String name, String description, String seller, double price ,boolean primeEligible, int stock, int category) {
+    public Product constructEntity(String name, String description, String seller, double price, boolean primeEligible,
+                                   int stock, int category) {
         Product product = new Product();
         product.setName(name);
         product.setDescription(description);

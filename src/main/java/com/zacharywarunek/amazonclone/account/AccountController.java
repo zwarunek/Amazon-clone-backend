@@ -14,7 +14,7 @@ public class AccountController {
     private final AccountService accountService;
 
     @Autowired
-    public AccountController(AccountService accountService){
+    public AccountController(AccountService accountService) {
         this.accountService = accountService;
     }
 
@@ -24,18 +24,18 @@ public class AccountController {
     }
 
     @PostMapping(path = "/authenticate")
-    public ResponseEntity<Object> authenticate(@RequestBody AuthRequest authRequest){
+    public ResponseEntity<Object> authenticate(@RequestBody AuthRequest authRequest) {
         return accountService.authenticate(authRequest);
     }
+
     @PutMapping(path = "{account_id}")
-    public ResponseEntity<Object> updateAccount(
-            @PathVariable("account_id") int account_id,
-            @RequestBody Account account){
+    public ResponseEntity<Object> updateAccount(@PathVariable("account_id") int account_id,
+                                                @RequestBody Account account) {
         return accountService.updateAccount(account_id, account);
     }
+
     @DeleteMapping(path = "{account_id}")
-    public void deleteAccount(
-            @PathVariable("account_id") int account_id){
+    public void deleteAccount(@PathVariable("account_id") int account_id) {
         accountService.deleteAccount(account_id);
     }
 }

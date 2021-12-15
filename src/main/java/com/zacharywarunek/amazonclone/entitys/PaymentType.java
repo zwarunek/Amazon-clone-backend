@@ -7,7 +7,7 @@ import javax.persistence.*;
 public class PaymentType {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TypeId")
     private int typeId;
     @Column(name = "TypeName")

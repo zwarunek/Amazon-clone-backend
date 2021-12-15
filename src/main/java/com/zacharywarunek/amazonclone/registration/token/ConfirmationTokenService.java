@@ -22,10 +22,10 @@ public class ConfirmationTokenService {
     }
 
     public void setConfirmedAt(String token) {
-        confirmationTokenRepo.updateConfirmedAt(
-                token, LocalDateTime.now());
+        confirmationTokenRepo.updateConfirmedAt(token, LocalDateTime.now());
     }
-    public void deleteAllAtAccountId(Account account){
+
+    public void deleteAllAtAccountId(Account account) {
         confirmationTokenRepo.deleteAllByAccountId(account);
     }
 }

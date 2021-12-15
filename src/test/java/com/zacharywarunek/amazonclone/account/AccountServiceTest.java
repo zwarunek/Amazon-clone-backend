@@ -3,7 +3,6 @@ package com.zacharywarunek.amazonclone.account;
 import com.zacharywarunek.amazonclone.config.JwtUtil;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,10 +16,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -53,13 +51,7 @@ class AccountServiceTest {
 
     @Test
     void shouldRegister() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "password1234",
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
         accountService.register(account);
 
         ArgumentCaptor<Account> accountArgumentCaptor = ArgumentCaptor.forClass(Account.class);
@@ -72,18 +64,12 @@ class AccountServiceTest {
 
     @Test
     void registerEmailTaken() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "password1234",
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
 
-        given(accountRepo.checkIfUsernameExists(anyString()))
-                .willReturn(true);
+        given(accountRepo.checkIfUsernameExists(anyString())).willReturn(true);
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.register(account));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.register(account));
         assertEquals("An account with that email " + account.getUsername() + " already exists", exception.getReason());
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());
         verify(accountRepo, never()).save(any());
@@ -91,16 +77,10 @@ class AccountServiceTest {
 
     @Test
     void registerNullValues() {
-        Account account = new Account(
-                null,
-                "Warunek",
-                "Zach@gmail.com",
-                "password1234",
-                AccountRole.USER
-        );
+        Account account = new Account(null, "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> accountService.register(account));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.register(account));
         assertEquals("An error occurred when creating the account: Null values present", exception.getReason());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         verify(accountRepo, never()).save(any());
@@ -109,45 +89,32 @@ class AccountServiceTest {
     @Test
     void shouldAuthenticate() {
         String password = "password1234";
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                passwordEncoder.encode(password),
-                AccountRole.USER
-        );
-        AuthRequest authRequest = new AuthRequest(
-                "Zach@gmail.com",
-                password
-        );
+        Account account =
+                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.USER);
+        AuthRequest authRequest = new AuthRequest("Zach@gmail.com", password);
         given(accountRepo.findAccountByUsername(authRequest.getUsername())).willReturn(java.util.Optional.of(account));
 
         ResponseEntity<Object> response = accountService.authenticate(authRequest);
-        assertEquals(
-                authRequest.getUsername(),
+        assertEquals(authRequest.getUsername(),
                 jwtUtil.getUsernameFromToken(response.getHeaders().get("Authorization").get(0)));
     }
 
     @Test
     void authenticateUsernameNotFound() {
-        AuthRequest authRequest = new AuthRequest(
-                "NotInDB@gmail.com",
-                "password1234"
-        );
+        AuthRequest authRequest = new AuthRequest("NotInDB@gmail.com", "password1234");
         given(accountRepo.findAccountByUsername(authRequest.getUsername())).willReturn(java.util.Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.authenticate(authRequest));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.authenticate(authRequest));
         assertEquals("Username or Password was incorrect", exception.getReason());
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
     }
 
     @Test
     void authenticateFieldsNotFilled() {
-        AuthRequest authRequest = new AuthRequest(
-                null,
-                "password"
-        );
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.authenticate(authRequest));
+        AuthRequest authRequest = new AuthRequest(null, "password");
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.authenticate(authRequest));
         assertEquals("'username' or 'password' fields not found", exception.getReason());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         verify(accountRepo, never()).findAccountByUsername(any());
@@ -155,20 +122,8 @@ class AccountServiceTest {
 
     @Test
     void updateAccount() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "passwor",
-                AccountRole.USER
-        );
-        Account accountDetails = new Account(
-                "ZachChange",
-                null,
-                "Zach@gmail.comChange",
-                "password1234",
-                null
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "passwor", AccountRole.USER);
+        Account accountDetails = new Account("ZachChange", null, "Zach@gmail.comChange", "password1234", null);
         given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
 
         accountService.updateAccount(1, accountDetails);
@@ -186,24 +141,14 @@ class AccountServiceTest {
 
     @Test
     void updateAccountUsernameAlreadyExists() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                "password1234",
-                AccountRole.USER
-        );
-        Account accountDetails = new Account(
-                "ZachChange",
-                null,
-                "Zach@gmail.comChange",
-                "password1234",
-                null
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
+        Account accountDetails = new Account("ZachChange", null, "Zach@gmail.comChange", "password1234", null);
         given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
-        given(accountRepo.findAccountByUsername(accountDetails.getUsername())).willReturn(java.util.Optional.of(account));
+        given(accountRepo.findAccountByUsername(accountDetails.getUsername())).willReturn(
+                java.util.Optional.of(account));
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.updateAccount(1, accountDetails));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.updateAccount(1, accountDetails));
         assertEquals("Username is already in use", exception.getReason());
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());
         verify(accountRepo, never()).save(any());
@@ -211,15 +156,10 @@ class AccountServiceTest {
 
     @Test
     void updateAccountDoesntExist() {
-        Account accountDetails = new Account(
-                "ZachChange",
-                "WarunekChange",
-                "Zach@gmail.comChange",
-                null,
-                null
-        );
+        Account accountDetails = new Account("ZachChange", "WarunekChange", "Zach@gmail.comChange", null, null);
         given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.updateAccount(1, accountDetails));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.updateAccount(1, accountDetails));
         assertEquals("Account with id " + 1 + " doesn't exist", exception.getReason());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         verify(accountRepo, never()).save(any());
@@ -228,13 +168,8 @@ class AccountServiceTest {
     @Test
     void shouldDeleteAccount() {
         String password = "password1234";
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                passwordEncoder.encode(password),
-                AccountRole.USER
-        );
+        Account account =
+                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.USER);
         account.setId(1);
         given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.of(account));
 
@@ -253,7 +188,8 @@ class AccountServiceTest {
     void deleteAccountNotFound() {
         given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.deleteAccount(1));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.deleteAccount(1));
         assertEquals("Account with id " + 1 + " doesn't exist", exception.getReason());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         verify(confirmationTokenService, never()).deleteAllAtAccountId(any());
@@ -278,7 +214,8 @@ class AccountServiceTest {
     void enableAccountNotFound() {
         given(accountRepo.checkIfUsernameExists(anyString())).willReturn(false);
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.enableAccount("ANYSTRING"));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.enableAccount("ANYSTRING"));
         assertEquals("Account with username ANYSTRING doesn't exist", exception.getReason());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         verify(accountRepo, never()).deleteById(any());
@@ -287,13 +224,8 @@ class AccountServiceTest {
 
     @Test
     void shouldLoadUserByUsername() {
-        Account account = new Account(
-                "Zach",
-                "Warunek",
-                "Zach@gmail.com",
-                passwordEncoder.encode("password1234"),
-                AccountRole.USER
-        );
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode("password1234"),
+                AccountRole.USER);
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
 
         UserDetails userDetails = accountService.loadUserByUsername(account.getUsername());
@@ -307,7 +239,8 @@ class AccountServiceTest {
     void loadUserByUsernameNotFound() {
         given(accountRepo.findAccountByUsername(anyString())).willReturn(java.util.Optional.empty());
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> accountService.loadUserByUsername("ANYSTRING"));
+        ResponseStatusException exception =
+                assertThrows(ResponseStatusException.class, () -> accountService.loadUserByUsername("ANYSTRING"));
         assertEquals("Account with username ANYSTRING doesn't exist", exception.getReason());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
 

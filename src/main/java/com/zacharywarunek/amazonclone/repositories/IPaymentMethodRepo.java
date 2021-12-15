@@ -1,7 +1,7 @@
 package com.zacharywarunek.amazonclone.repositories;
 
-import com.zacharywarunek.amazonclone.repositories.JPA.IJPABaseRepo;
 import com.zacharywarunek.amazonclone.entitys.PaymentMethod;
+import com.zacharywarunek.amazonclone.repositories.JPA.IJPABaseRepo;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
