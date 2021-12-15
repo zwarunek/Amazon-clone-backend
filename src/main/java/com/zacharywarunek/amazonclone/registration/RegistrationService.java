@@ -20,17 +20,10 @@ import java.time.LocalDateTime;
 public class RegistrationService {
 
     private final AccountService accountService;
-    private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailSender emailSender;
 
     public ResponseEntity<Object> register(RegistrationRequest request) {
-        boolean isValidEmail = emailValidator.
-                test(request.getEmail());
-
-        if (!isValidEmail) {
-            throw new IllegalStateException("email not valid");
-        }
 
         String token = accountService.register(
                 new Account(

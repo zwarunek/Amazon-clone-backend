@@ -101,7 +101,7 @@ public class AccountService implements UserDetailsService {
         accountRepo.save(account);
         Map<String, Object> map = new HashMap<>();
         map.put("status", HttpStatus.OK.value());
-        map.put("Message", "Updated Account");
+        map.put("message", "Updated Account");
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
