@@ -54,8 +54,9 @@ class AccountRepoTest {
 
     @Test
     void checkIfEmailExistsShouldBeFalse() {
-        Account account = new Account("Zach", "Warunek", "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                "za@gmail.com", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek",
+                                      "za@gmail.com", "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
+                                      AccountRole.USER);
         accountRepo.save(account);
 
         assertFalse(accountRepo.checkIfUsernameExists("notInDatabase@gmail.com"));

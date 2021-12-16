@@ -21,12 +21,12 @@ public class MainController {
     }
 
     @RequestMapping(value = "/apiTest", method = RequestMethod.GET)
-    public ResponseObject apiTest() {
-        ResponseObject response = new ResponseObject();
-        response.setData("inside /apiTest");
-        response.setStatus(200);
-        response.setMessage("API is functioning normally for environment: " + System.getenv("ENV"));
-        return response;
+    public ResponseEntity<Object> apiTest() {
+        return ResponseEntity.ok().body("API is functioning normally for environment: " + System.getenv("ENV"));
+    }
+    @RequestMapping(value = "/apiTestWithAuth", method = RequestMethod.GET)
+    public ResponseEntity<Object> apiTestWithAuth() {
+        return ResponseEntity.ok().body("API auth is functioning normally for environment: " + System.getenv("ENV"));
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)

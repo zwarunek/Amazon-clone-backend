@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,26 +90,23 @@ public class AccountService implements UserDetailsService {
         BeansUtil<Account> beansUtil = new BeansUtil<>();
         beansUtil.copyNonNullProperties(account, accountDetails);
         accountRepo.save(account);
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", HttpStatus.OK.value());
-        map.put("message", "Updated Account");
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        return ResponseEntity.ok().body("Updated Account");
     }
 
-    public void deleteAccount(int account_id) {
+    public ResponseEntity<Object> deleteAccount(int account_id) {
         Optional<Account> account = accountRepo.findById(account_id);
         if(!account.isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with id " + account_id + " doesn't exist");
         confirmationTokenService.deleteAllAtAccountId(account.get());
         accountRepo.deleteById(account.get().getId());
+        return ResponseEntity.ok().body("Deleted Account");
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username){
         Optional<Account> account = accountRepo.findAccountByUsername(username);
-        if(account.isPresent())
-            return new User(account.get().getUsername(), account.get().getPassword(), account.get().getAuthorities());
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with username " + username + " doesn't exist");
+        return account.map(value -> new User(value.getUsername(), value.getPassword(), value.getAuthorities()))
+                .orElse(null);
     }
 
     public void enableAccount(String username) {
