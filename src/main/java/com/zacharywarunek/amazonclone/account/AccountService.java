@@ -96,18 +96,16 @@ public class AccountService implements UserDetailsService {
         BeansUtil<Account> beansUtil = new BeansUtil<>();
         beansUtil.copyNonNullProperties(account, accountDetails);
         accountRepo.save(account);
-        Map<String, Object> map = new HashMap<>();
-        map.put("status", HttpStatus.OK.value());
-        map.put("message", "Updated Account");
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        return ResponseEntity.ok().body("Updated account");
     }
 
-    public void deleteAccount(int account_id) {
+    public ResponseEntity<Object> deleteAccount(int account_id) {
         Optional<Account> accountOptional = accountRepo.findById(account_id);
         if(!accountOptional.isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with id " + account_id + " doesn't exist");
         confirmationTokenService.deleteAllAtAccountId(accountOptional.get());
         accountRepo.deleteById(accountOptional.get().getId());
+        return ResponseEntity.ok().body("Deleted account");
     }
 
     @Override

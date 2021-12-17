@@ -26,13 +26,13 @@ public class RegistrationService {
     public ResponseEntity<Object> register(RegistrationRequest request) {
 
         String token = accountService.register(
-                new Account(request.getFirstName(), request.getLastName(), request.getEmail(), request.getPassword(),
+                new Account(request.getFirstName(), request.getLastName(), request.getUsername(), request.getPassword(),
                         AccountRole.ROLE_USER
 
                 ));
 
         String link = System.getenv("URL") + "/api/v1/registration/confirm?token=" + token;
-        emailSender.send(request.getEmail(), buildEmail(request.getFirstName(), link));
+        emailSender.send(request.getUsername(), buildEmail(request.getFirstName(), link));
         ResponseObject responseObject = new ResponseObject();
         responseObject.setStatus(HttpStatus.OK.value());
         responseObject.setMessage("Registration Successful");

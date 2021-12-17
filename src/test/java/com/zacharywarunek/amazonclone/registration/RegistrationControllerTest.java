@@ -90,7 +90,7 @@ class RegistrationControllerTest {
                                        request.getLastName(),
                                        request.getUsername(),
                                        request.getPassword(),
-                                       AccountRole.USER));
+                                       AccountRole.ROLE_USER));
         assertThat(passwordEncoder.matches(request.getPassword(), capturedAccount.getPassword())).isTrue();
     }
 
@@ -110,7 +110,7 @@ class RegistrationControllerTest {
 
     @Test
     void confirm() throws Exception {
-        Account account = new Account("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234", AccountRole.ROLE_USER);
 
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =

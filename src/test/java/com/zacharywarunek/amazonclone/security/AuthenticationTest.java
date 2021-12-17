@@ -35,7 +35,7 @@ class AuthenticationTest {
 
     @Test
     void shouldAuthenticate() throws Exception {
-        Account account = new Account("Zach", "Warunek", "ZachAuth@gmail.com", "passwo234", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "ZachAuth@gmail.com", "passwo234", AccountRole.ROLE_USER);
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
 
         mvc.perform(get("/apiTestWithAuth").accept(MediaType.APPLICATION_JSON)
@@ -47,7 +47,7 @@ class AuthenticationTest {
 
     @Test
     void authenticationUserNotFound() throws Exception {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "2wfg", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "2wfg", AccountRole.ROLE_USER);
         String token = jwtUtil.generateToken(account);
         mvc.perform(put("/apiTestWithAuth").contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", Constants.TOKEN_PREFIX + token)).andExpect(status().is(401))
