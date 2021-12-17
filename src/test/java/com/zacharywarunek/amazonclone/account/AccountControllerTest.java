@@ -75,8 +75,8 @@ class AccountControllerTest {
     @Test
     @WithMockUser(username = "test@gmail.com", roles = {"USER"})
     void getAllAccounts() throws Exception {
-        Account account1 = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
-        Account account2 = new Account("Zach2", "Warunek2", "Zach@gmail.com2", "password12342", AccountRole.USER);
+        Account account1 = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
+        Account account2 = new Account("Zach2", "Warunek2", "Zach@gmail.com2", "password12342", AccountRole.ROLE_USER);
         given(accountRepo.findAll()).willReturn(Arrays.asList(account1, account2));
 
         MockHttpServletResponse response =
@@ -91,7 +91,7 @@ class AccountControllerTest {
 
         String password = "password1234";
         Account account =
-                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.USER);
+                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.ROLE_USER);
         AuthRequest authRequest = new AuthRequest("Zach@gmail.com", password);
         given(accountRepo.findAccountByUsername(authRequest.getUsername())).willReturn(java.util.Optional.of(account));
 
@@ -130,7 +130,7 @@ class AccountControllerTest {
     @Test
     @WithMockUser(username = "test@gmail.com", roles = {"USER"})
     void updateAccount() throws Exception {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password", AccountRole.ROLE_USER);
         Map<String, String> accountDetails = new HashMap<>();
         accountDetails.put("first_name", "Zachary");
         accountDetails.put("username", "changedEmail");
@@ -166,7 +166,7 @@ class AccountControllerTest {
     @Test
     @WithMockUser(username = "test@gmail.com", roles = {"USER"})
     void updateAccountUsernameAlreadyExists() throws Exception {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
         Map<String, Object> accountDetails = new HashMap<>();
         accountDetails.put("first_name", "Zachary");
         accountDetails.put("username", "changedEmail");
@@ -201,7 +201,7 @@ class AccountControllerTest {
     void deleteAccount() throws Exception {
         String password = "password1234";
         Account account =
-                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.USER);
+                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.ROLE_USER);
         account.setId(1);
         given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.of(account));
 

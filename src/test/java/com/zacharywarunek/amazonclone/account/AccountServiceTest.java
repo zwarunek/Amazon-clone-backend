@@ -51,7 +51,7 @@ class AccountServiceTest {
 
     @Test
     void shouldRegister() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
         accountService.register(account);
 
         ArgumentCaptor<Account> accountArgumentCaptor = ArgumentCaptor.forClass(Account.class);
@@ -64,7 +64,7 @@ class AccountServiceTest {
 
     @Test
     void registerEmailTaken() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
 
         given(accountRepo.checkIfUsernameExists(anyString())).willReturn(true);
 
@@ -77,7 +77,7 @@ class AccountServiceTest {
 
     @Test
     void registerNullValues() {
-        Account account = new Account(null, "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
+        Account account = new Account(null, "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
 
         ResponseStatusException exception =
                 assertThrows(ResponseStatusException.class, () -> accountService.register(account));
@@ -90,7 +90,7 @@ class AccountServiceTest {
     void shouldAuthenticate() {
         String password = "password1234";
         Account account =
-                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.USER);
+                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.ROLE_USER);
         AuthRequest authRequest = new AuthRequest("Zach@gmail.com", password);
         given(accountRepo.findAccountByUsername(authRequest.getUsername())).willReturn(java.util.Optional.of(account));
 
@@ -122,10 +122,9 @@ class AccountServiceTest {
 
     @Test
     void updateAccount() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "passwor", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "passwor", AccountRole.ROLE_USER);
         Account accountDetails = new Account("ZachChange", null, "Zach@gmail.comChange", "password1234", null);
         given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
-
         accountService.updateAccount(1, accountDetails);
 
         ArgumentCaptor<Account> accountCaptor = ArgumentCaptor.forClass(Account.class);
@@ -141,7 +140,7 @@ class AccountServiceTest {
 
     @Test
     void updateAccountUsernameAlreadyExists() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
         Account accountDetails = new Account("ZachChange", null, "Zach@gmail.comChange", "password1234", null);
         given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
         given(accountRepo.findAccountByUsername(accountDetails.getUsername())).willReturn(
@@ -158,6 +157,7 @@ class AccountServiceTest {
     void updateAccountDoesntExist() {
         Account accountDetails = new Account("ZachChange", "WarunekChange", "Zach@gmail.comChange", null, null);
         given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
+
         ResponseStatusException exception =
                 assertThrows(ResponseStatusException.class, () -> accountService.updateAccount(1, accountDetails));
         assertEquals("Account with id " + 1 + " doesn't exist", exception.getReason());
@@ -169,7 +169,7 @@ class AccountServiceTest {
     void shouldDeleteAccount() {
         String password = "password1234";
         Account account =
-                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.USER);
+                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.ROLE_USER);
         account.setId(1);
         given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.of(account));
 
@@ -225,7 +225,7 @@ class AccountServiceTest {
     @Test
     void shouldLoadUserByUsername() {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode("password1234"),
-                AccountRole.USER);
+                AccountRole.ROLE_USER);
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
 
         UserDetails userDetails = accountService.loadUserByUsername(account.getUsername());

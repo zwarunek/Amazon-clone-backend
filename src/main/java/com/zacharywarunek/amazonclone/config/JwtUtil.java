@@ -38,14 +38,8 @@ public class JwtUtil implements Serializable {
     }
 
     public String generateToken(UserDetails user) {
-        return doGenerateToken(user.getUsername());
-    }
-
-    private String doGenerateToken(String subject) {
-
-        Claims claims = Jwts.claims().setSubject(subject);
-        claims.put("scopes", Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
-
+        Claims claims = Jwts.claims().setSubject(user.getUsername());
+        claims.put("scopes", user.getAuthorities());
         return Jwts.builder().setClaims(claims).setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + Constants.ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
                 .signWith(SignatureAlgorithm.HS256, Constants.SIGNING_KEY).compact();

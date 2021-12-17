@@ -81,7 +81,7 @@ class ConfirmationTokenServiceTest {
     @Test
     void deleteAllAtAccountId() {
 
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.USER);
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
         account.setId(5);
         confirmationTokenService.deleteAllAtAccountId(account);
 

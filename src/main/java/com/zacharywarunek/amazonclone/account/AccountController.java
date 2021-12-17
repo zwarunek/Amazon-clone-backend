@@ -1,13 +1,14 @@
 package com.zacharywarunek.amazonclone.account;
 
-import com.zacharywarunek.amazonclone.util.AuthRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping(path = "api/v1/account")
 public class AccountController {
 
@@ -18,14 +19,10 @@ public class AccountController {
         this.accountService = accountService;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<Account> getAllAccounts() {
         return accountService.getAllAccounts();
-    }
-
-    @PostMapping(path = "/authenticate")
-    public ResponseEntity<Object> authenticate(@RequestBody AuthRequest authRequest) {
-        return accountService.authenticate(authRequest);
     }
 
     @PutMapping(path = "{account_id}")

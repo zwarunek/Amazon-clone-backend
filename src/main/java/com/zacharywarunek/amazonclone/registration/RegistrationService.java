@@ -27,7 +27,7 @@ public class RegistrationService {
 
         String token = accountService.register(
                 new Account(request.getFirstName(), request.getLastName(), request.getEmail(), request.getPassword(),
-                        AccountRole.USER
+                        AccountRole.ROLE_USER
 
                 ));
 

@@ -32,7 +32,7 @@ class ConfirmationTokenRepoTest {
     @Test
     void findByToken() {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =
@@ -46,7 +46,7 @@ class ConfirmationTokenRepoTest {
     @Test
     void findByTokenNotFound() {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =
@@ -60,7 +60,7 @@ class ConfirmationTokenRepoTest {
     @Test
     void updateConfirmedAt() {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =
@@ -79,7 +79,7 @@ class ConfirmationTokenRepoTest {
     @Test
     void deleteAllByAccountId() {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =

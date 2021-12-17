@@ -25,7 +25,7 @@ class AccountRepoTest {
         String email = "Zach@gmail.com";
         Account account =
                 new Account("Zach", "Warunek", email, "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                        AccountRole.USER);
+                        AccountRole.ROLE_USER);
         accountRepo.save(account);
         Optional<Account> accountOptional = accountRepo.findAccountByUsername(email);
         assertTrue(accountOptional.isPresent());
@@ -35,7 +35,7 @@ class AccountRepoTest {
     @Test
     void findAccountByEmailShouldBeFalse() {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
         accountRepo.save(account);
         Optional<Account> accountOptional = accountRepo.findAccountByUsername("notInDatabase@gmail.com");
         assertFalse(accountOptional.isPresent());
@@ -46,7 +46,7 @@ class AccountRepoTest {
         String email = "za@gmail.com";
         Account account =
                 new Account("Zach", "Warunek", email, "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                        AccountRole.USER);
+                        AccountRole.ROLE_USER);
         accountRepo.save(account);
 
         assertTrue(accountRepo.checkIfUsernameExists(email));
@@ -55,7 +55,7 @@ class AccountRepoTest {
     @Test
     void checkIfEmailExistsShouldBeFalse() {
         Account account = new Account("Zach", "Warunek", "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-                "za@gmail.com", AccountRole.USER);
+                "za@gmail.com", AccountRole.ROLE_USER);
         accountRepo.save(account);
 
         assertFalse(accountRepo.checkIfUsernameExists("notInDatabase@gmail.com"));
@@ -64,7 +64,7 @@ class AccountRepoTest {
     @Test
     void enableAccount() {
         Account account = new Account("Zach", "Warunek", "za@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.USER);
+                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
         accountRepo.save(account);
         accountRepo.enableAccount(account.getUsername());
 
