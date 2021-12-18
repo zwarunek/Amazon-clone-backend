@@ -1,14 +1,13 @@
 package com.zacharywarunek.amazonclone.account;
 
+import com.zacharywarunek.amazonclone.address.AddressRepo;
 import com.zacharywarunek.amazonclone.config.JwtUtil;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationToken;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
-import com.zacharywarunek.amazonclone.util.BeansUtil;
 import lombok.AllArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +31,7 @@ public class AccountService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
     AccountRepo accountRepo;
+    AddressRepo addressRepo;
     JwtUtil jwtUtil;
 
     public List<Account> getAllAccounts() {
@@ -90,10 +90,6 @@ public class AccountService implements UserDetailsService {
             account.setFirst_name(accountDetails.getFirst_name());
         if(accountDetails.getFirst_name() != null && !accountDetails.getFirst_name().equals(account.getFirst_name()))
             account.setLast_name(accountDetails.getLast_name());
-        logger.info(account.toString());
-//        BeansUtil<Account> beansUtil = new BeansUtil<>();
-//        beansUtil.copyNonNullProperties(account, accountDetails);
-//        accountRepo.save(account);
         return ResponseEntity.ok().body("Updated account");
     }
 
@@ -101,7 +97,8 @@ public class AccountService implements UserDetailsService {
         Optional<Account> accountOptional = accountRepo.findById(account_id);
         if(!accountOptional.isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with id " + account_id + " doesn't exist");
-        confirmationTokenService.deleteAllAtAccountId(accountOptional.get());
+        confirmationTokenService.deleteAllAtAccount(accountOptional.get());
+        addressRepo.deleteAllAtAccount(accountOptional.get());
         accountRepo.deleteById(accountOptional.get().getId());
         return ResponseEntity.ok().body("Deleted account");
     }

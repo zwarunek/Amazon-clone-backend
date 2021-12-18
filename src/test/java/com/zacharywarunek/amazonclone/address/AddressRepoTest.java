@@ -7,7 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -76,7 +75,7 @@ class AddressRepoTest {
         addressRepo.save(address1);
         addressRepo.save(address2);
         addressRepo.save(address3);
-        addressRepo.deleteAllByAccount(account);
+        addressRepo.deleteAllAtAccount(account);
         assertThat(addressRepo.findAddressByAccount(account)).isEmpty();
     }
 
@@ -101,11 +100,11 @@ class AddressRepoTest {
         Optional<Address> addressOptional1 = addressRepo.findById(address1.getId());
         Optional<Address> addressOptional2 = addressRepo.findFavoriteAddressByAccount(account);
         assertThat(addressOptional1.isPresent()).isTrue();
-        assertThat(addressOptional1.get().isFavorite()).isFalse();
+        assertThat(addressOptional1.get().getFavorite()).isFalse();
         assertThat(addressOptional2.isPresent()).isTrue();
         assertThat(addressOptional2.get())
                 .usingRecursiveComparison().ignoringFields("favorite").isEqualTo(address2);
-        assertThat(addressOptional2.get().isFavorite()).isTrue();
+        assertThat(addressOptional2.get().getFavorite()).isTrue();
     }
 
 }

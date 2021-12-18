@@ -2,6 +2,8 @@ package com.zacharywarunek.amazonclone.config;
 
 import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.account.AccountRepo;
+import com.zacharywarunek.amazonclone.address.Address;
+import com.zacharywarunek.amazonclone.address.AddressRepo;
 import lombok.AllArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,17 +17,26 @@ import java.util.Optional;
 public class Secure {
     protected final Log logger = LogFactory.getLog(getClass());
     private AccountRepo accountRepo;
+    private AddressRepo addressRepo;
 
-    public boolean checkUserId(Authentication auth, Long account_id) {
+    public boolean checkAccountIdAuth(Authentication auth, Long account_id) {
         Optional<Account> result = accountRepo.findAccountByUsername(auth.getName());
-        if(result.isPresent() && (result.get().getId().equals(account_id) ||
+        if(!result.isPresent() || (result.get().getId().equals(account_id) ||
                 auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")))) {
-            logger.info(result.get().getAuthorities() + "|" + result.get().getUsername() + "|" + result.get().getId() +
-                                "\tAccessing id " + account_id);
+            logger.info("\t\tAccessing account_id " + account_id);
             return true;
         }
         return false;
+    }
 
-
+    public boolean checkAddressIdAuth(Authentication auth, Long account_id, Long address_id) {
+        Optional<Address> optionalAddress = addressRepo.findById(address_id);
+        if(!optionalAddress.isPresent() || (checkAccountIdAuth(auth, account_id) &&
+                (optionalAddress.get().getAccount().getUsername().equals(auth.getName()) ||
+                        auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))))) {
+            logger.info("\t\tAccessing address_id " + address_id);
+            return true;
+        }
+        return false;
     }
 }

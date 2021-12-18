@@ -1,5 +1,6 @@
 package com.zacharywarunek.amazonclone.account;
 
+import com.zacharywarunek.amazonclone.address.AddressRepo;
 import com.zacharywarunek.amazonclone.config.JwtUtil;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
@@ -28,6 +29,8 @@ class AccountServiceTest {
 
     @Mock
     private AccountRepo accountRepo;
+    @Mock
+    private AddressRepo addressRepo;
     @InjectMocks
     private JwtUtil jwtUtil;
     @Mock
@@ -39,7 +42,8 @@ class AccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        accountService = new AccountService(passwordEncoder, confirmationTokenService, accountRepo, jwtUtil);
+        accountService = new AccountService(passwordEncoder, confirmationTokenService, accountRepo,
+                                            addressRepo, jwtUtil);
     }
 
     @Test

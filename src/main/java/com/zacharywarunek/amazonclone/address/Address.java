@@ -22,12 +22,12 @@ public class Address implements Serializable {
     private String address;
     private String city;
     private String state;
-    private int zipcode;
-    private boolean favorite;
+    private Integer zipcode;
+    private Boolean favorite;
     private String first_name;
     private String last_name;
 
-    public Address(Account account, String address, String city, String state, int zipcode, boolean favorite,
+    public Address(Account account, String address, String city, String state, Integer zipcode, Boolean favorite,
                    String first_name,
                    String last_name) {
 

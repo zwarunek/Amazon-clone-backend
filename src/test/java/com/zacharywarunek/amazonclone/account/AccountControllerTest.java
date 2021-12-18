@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zacharywarunek.amazonclone.config.JwtFilter;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenRepo;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
-import com.zacharywarunek.amazonclone.util.AuthRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -75,7 +74,7 @@ class AccountControllerTest {
         given(accountRepo.findAccountByUsername(account1.getUsername())).willReturn(java.util.Optional.of(account1));
         given(accountRepo.findAll()).willReturn(Arrays.asList(account1, account2));
 
-        mvc.perform(get("/api/v1/account").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+        mvc.perform(get("/api/v1/accounts").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
                 .andExpect(content().string(asJsonString(Arrays.asList(account1, account2)))).andReturn().getResponse();
     }
 
@@ -91,7 +90,7 @@ class AccountControllerTest {
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findById(1L)).willReturn(java.util.Optional.of(account));
 
-        mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(put("/api/v1/accounts/" + 1).contentType(MediaType.APPLICATION_JSON)
                             .content(asJsonString(accountDetails))).andExpect(status().isOk())
                 .andExpect(content().string("Updated account"));
 
@@ -127,7 +126,7 @@ class AccountControllerTest {
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findAccountByUsername(accountDetails.get("username"))).willReturn(java.util.Optional.of(account));
 
-        mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(put("/api/v1/accounts/" + 1).contentType(MediaType.APPLICATION_JSON)
                             .content(asJsonString(accountDetails))).andExpect(status().is(HttpStatus.CONFLICT.value()))
                 .andExpect(status().reason("Username is already in use"));
         verify(accountRepo, never()).save(any());
@@ -140,7 +139,7 @@ class AccountControllerTest {
         account.setId(1L);
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findById(1L)).willReturn(java.util.Optional.empty());
-        mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON).content("{}"))
+        mvc.perform(put("/api/v1/accounts/" + 1).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(status().reason("Account with id " + 1 + " doesn't exist"));
         verify(accountRepo, never()).save(any());
@@ -152,7 +151,7 @@ class AccountControllerTest {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
         account.setId(1L);
         given(accountRepo.findAccountByUsername("NotZach@gmail.com")).willReturn(java.util.Optional.of(account));
-        mvc.perform(put("/api/v1/account/" + 2).contentType(MediaType.APPLICATION_JSON).content("{}"))
+        mvc.perform(put("/api/v1/accounts/" + 2).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().is(HttpStatus.FORBIDDEN.value()))
                 .andExpect(status().reason("Forbidden"));
         verify(accountRepo, never()).save(any());
@@ -171,7 +170,7 @@ class AccountControllerTest {
         given(accountRepo.findById(1L)).willReturn(java.util.Optional.of(account));
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
 
-        mvc.perform(delete("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(delete("/api/v1/accounts/" + 1).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().string("Deleted account"));
 
         ArgumentCaptor<Account> accountCaptor = ArgumentCaptor.forClass(Account.class);
@@ -195,7 +194,7 @@ class AccountControllerTest {
         account.setId(1L);
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
-        mvc.perform(delete("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(delete("/api/v1/accounts/" + 1).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(status().reason("Account with id " + 1 + " doesn't exist"));
         verify(confirmationTokenRepo, never()).deleteAllByAccountId(any());

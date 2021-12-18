@@ -32,8 +32,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/api/v*/account/{account_id}/**")
-                .access("@secure.checkUserId(authentication,#account_id)");
+        http.authorizeRequests().antMatchers("/api/v*/accounts/{account_id}/addresses/{address_id}/**")
+                .access("@secure.checkAddressIdAuth(authentication, #account_id, #address_id)");
+        http.authorizeRequests().antMatchers("/api/v*/accounts/{account_id}/**")
+                .access("@secure.checkAccountIdAuth(authentication,#account_id)");
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers("/api/v*/registration/**", "/api/v*/authenticate/**", "/api/v*/apiTest", "/v3/api-docs")
                 .permitAll().anyRequest().authenticated().and().exceptionHandling()

@@ -25,7 +25,7 @@ public class ConfirmationTokenService {
         confirmationTokenRepo.updateConfirmedAt(token, LocalDateTime.now());
     }
 
-    public void deleteAllAtAccountId(Account account) {
+    public void deleteAllAtAccount(Account account) {
         confirmationTokenRepo.deleteAllByAccountId(account);
     }
 }

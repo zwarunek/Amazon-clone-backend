@@ -20,7 +20,7 @@ public interface AddressRepo extends IJPABaseRepo<Address> {
     @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Address a WHERE a.account = :account")
-    int deleteAllByAccount(Account account);
+    int deleteAllAtAccount(Account account);
 
     @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
