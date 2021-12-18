@@ -71,7 +71,7 @@ class AccountControllerTest {
     void getAllAccounts() throws Exception {
         Account account1 = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
         Account account2 = new Account("Zach2", "Warunek2", "Zach@gmail.com2", "password12342", AccountRole.ROLE_USER);
-        account1.setId(1);
+        account1.setId(1L);
         given(accountRepo.findAccountByUsername(account1.getUsername())).willReturn(java.util.Optional.of(account1));
         given(accountRepo.findAll()).willReturn(Arrays.asList(account1, account2));
 
@@ -83,13 +83,13 @@ class AccountControllerTest {
     @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void updateAccount() throws Exception {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password", AccountRole.ROLE_USER);
-        account.setId(1);
+        account.setId(1L);
         Map<String, String> accountDetails = new HashMap<>();
         accountDetails.put("first_name", "Zachary");
         accountDetails.put("username", "changedEmail");
         accountDetails.put("password", "newPassword");
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
-        given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
+        given(accountRepo.findById(1L)).willReturn(java.util.Optional.of(account));
 
         mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON)
                             .content(asJsonString(accountDetails))).andExpect(status().isOk())
@@ -119,11 +119,11 @@ class AccountControllerTest {
     @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void updateAccountUsernameAlreadyExists() throws Exception {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
-        account.setId(1);
+        account.setId(1L);
         Map<String, String> accountDetails = new HashMap<>();
         accountDetails.put("first_name", "Zachary");
         accountDetails.put("username", "changedEmail");
-        given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
+        given(accountRepo.findById(1L)).willReturn(java.util.Optional.of(account));
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findAccountByUsername(accountDetails.get("username"))).willReturn(java.util.Optional.of(account));
 
@@ -137,9 +137,9 @@ class AccountControllerTest {
     @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void updateAccountDoesntExist() throws Exception {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
-        account.setId(1);
+        account.setId(1L);
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
-        given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
+        given(accountRepo.findById(1L)).willReturn(java.util.Optional.empty());
         mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(status().reason("Account with id " + 1 + " doesn't exist"));
@@ -150,7 +150,7 @@ class AccountControllerTest {
     @WithMockUser(username = "NotZach@gmail.com")
     void updateNotCorrectRoleAndUsername() throws Exception {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
-        account.setId(1);
+        account.setId(1L);
         given(accountRepo.findAccountByUsername("NotZach@gmail.com")).willReturn(java.util.Optional.of(account));
         mvc.perform(put("/api/v1/account/" + 2).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().is(HttpStatus.FORBIDDEN.value()))
@@ -167,15 +167,15 @@ class AccountControllerTest {
                                       "Zach@gmail.com",
                                       passwordEncoder.encode(password),
                                       AccountRole.ROLE_USER);
-        account.setId(1);
-        given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.of(account));
+        account.setId(1L);
+        given(accountRepo.findById(1L)).willReturn(java.util.Optional.of(account));
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
 
-        mvc.perform(delete("/api/v1/account/" + account.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(delete("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andExpect(content().string("Deleted account"));
 
         ArgumentCaptor<Account> accountCaptor = ArgumentCaptor.forClass(Account.class);
-        ArgumentCaptor<Integer> accountIdCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Long> accountIdCaptor = ArgumentCaptor.forClass(Long.class);
         verify(confirmationTokenRepo).deleteAllByAccountId(accountCaptor.capture());
         verify(accountRepo).deleteById(accountIdCaptor.capture());
 
@@ -192,7 +192,7 @@ class AccountControllerTest {
                                       "Zach@gmail.com",
                                       passwordEncoder.encode("password"),
                                       AccountRole.ROLE_USER);
-        account.setId(1);
+        account.setId(1L);
         given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
         mvc.perform(delete("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON))

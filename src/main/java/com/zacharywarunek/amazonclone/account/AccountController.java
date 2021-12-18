@@ -22,13 +22,13 @@ public class AccountController {
     }
 
     @PutMapping(path = "{account_id}")
-    public ResponseEntity<Object> updateAccount(@PathVariable("account_id") int account_id,
+    public ResponseEntity<Object> updateAccount(@PathVariable("account_id") Long account_id,
                                                 @RequestBody Account account) {
         return accountService.updateAccount(account_id, account);
     }
 
     @DeleteMapping(path = "{account_id}")
-    public ResponseEntity<Object> deleteAccount(@PathVariable("account_id") int account_id) {
+    public ResponseEntity<Object> deleteAccount(@PathVariable("account_id") Long account_id) {
         return accountService.deleteAccount(account_id);
     }
 }

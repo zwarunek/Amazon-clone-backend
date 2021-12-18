@@ -74,7 +74,7 @@ public class AccountService implements UserDetailsService {
     }
 
     @Transactional
-    public ResponseEntity<Object> updateAccount(int account_id, Account accountDetails) {
+    public ResponseEntity<Object> updateAccount(Long account_id, Account accountDetails) {
         Optional<Account> accountOptional = accountRepo.findById(account_id);
         if(!accountOptional.isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with id " + account_id + " doesn't exist");
@@ -91,7 +91,7 @@ public class AccountService implements UserDetailsService {
         return ResponseEntity.ok().body("Updated account");
     }
 
-    public ResponseEntity<Object> deleteAccount(int account_id) {
+    public ResponseEntity<Object> deleteAccount(Long account_id) {
         Optional<Account> accountOptional = accountRepo.findById(account_id);
         if(!accountOptional.isPresent())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with id " + account_id + " doesn't exist");
