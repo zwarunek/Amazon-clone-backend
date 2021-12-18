@@ -1,6 +1,6 @@
 package com.zacharywarunek.amazonclone.account;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -9,15 +9,11 @@ import java.util.List;
 
 @RestController
 @Validated
+@AllArgsConstructor
 @RequestMapping(path = "api/v1/account")
 public class AccountController {
 
     private final AccountService accountService;
-
-    @Autowired
-    public AccountController(AccountService accountService) {
-        this.accountService = accountService;
-    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,8 +32,11 @@ class ConfirmationTokenRepoTest {
 
     @Test
     void findByToken() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
+        Account account = new Account("Zach",
+                                      "Warunek",
+                                      "Zach@gmail.com",
+                                      "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
+                                      AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =
@@ -45,8 +49,11 @@ class ConfirmationTokenRepoTest {
 
     @Test
     void findByTokenNotFound() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
+        Account account = new Account("Zach",
+                                      "Warunek",
+                                      "Zach@gmail.com",
+                                      "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
+                                      AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =
@@ -59,8 +66,11 @@ class ConfirmationTokenRepoTest {
 
     @Test
     void updateConfirmedAt() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
+        Account account = new Account("Zach",
+                                      "Warunek",
+                                      "Zach@gmail.com",
+                                      "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
+                                      AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =
@@ -72,14 +82,18 @@ class ConfirmationTokenRepoTest {
         Optional<ConfirmationToken> tokenOptional = confirmationTokenRepo.findById(confirmationToken.getId());
 
         assertTrue(tokenOptional.isPresent());
-        assertEquals(now, tokenOptional.get().getConfirmed_at());
+        assertEquals(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                     tokenOptional.get().getConfirmed_at().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
     }
 
     @Test
     void deleteAllByAccountId() {
-        Account account = new Account("Zach", "Warunek", "Zach@gmail.com",
-                "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW", AccountRole.ROLE_USER);
+        Account account = new Account("Zach",
+                                      "Warunek",
+                                      "Zach@gmail.com",
+                                      "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
+                                      AccountRole.ROLE_USER);
         accountRepo.save(account);
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =

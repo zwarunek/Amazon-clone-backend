@@ -1,11 +1,13 @@
 package com.zacharywarunek.amazonclone.registration.token;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zacharywarunek.amazonclone.account.Account;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Table(name = "confirmation_token")
-public class ConfirmationToken {
+public class ConfirmationToken implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +23,13 @@ public class ConfirmationToken {
 
     private String token;
 
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created_at;
 
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expires_at;
 
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime confirmed_at;
 
     @ManyToOne

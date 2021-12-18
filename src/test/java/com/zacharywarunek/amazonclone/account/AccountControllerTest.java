@@ -2,6 +2,7 @@ package com.zacharywarunek.amazonclone.account;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zacharywarunek.amazonclone.config.JwtFilter;
+import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenRepo;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
 import org.junit.jupiter.api.Test;
@@ -44,8 +45,10 @@ class AccountControllerTest {
     JwtFilter jwtFilter;
     @Autowired
     private MockMvc mvc;
-    @MockBean
+    @Autowired
     private ConfirmationTokenService confirmationTokenService;
+    @MockBean
+    private ConfirmationTokenRepo confirmationTokenRepo;
     @InjectMocks
     private BCryptPasswordEncoder passwordEncoder;
 
@@ -64,10 +67,12 @@ class AccountControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
+    @WithMockUser(username = "test@gmail.com", roles = {"ADMIN"})
     void getAllAccounts() throws Exception {
         Account account1 = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
         Account account2 = new Account("Zach2", "Warunek2", "Zach@gmail.com2", "password12342", AccountRole.ROLE_USER);
+        account1.setId(1);
+        given(accountRepo.findAccountByUsername(account1.getUsername())).willReturn(java.util.Optional.of(account1));
         given(accountRepo.findAll()).willReturn(Arrays.asList(account1, account2));
 
         mvc.perform(get("/api/v1/account").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
@@ -75,51 +80,20 @@ class AccountControllerTest {
     }
 
     @Test
-    void authenticate() throws Exception {
-
-        String password = "password1234";
-        Account account =
-                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.ROLE_USER);
-        AuthRequest authRequest = new AuthRequest("Zach@gmail.com", password);
-        given(accountRepo.findAccountByUsername(authRequest.getUsername())).willReturn(java.util.Optional.of(account));
-
-        mvc.perform(post("/api/v1/account/authenticate").contentType(MediaType.APPLICATION_JSON)
-                            .content(asJsonString(authRequest))).andExpect(status().isOk())
-                .andExpect(content().string("Authorization Successful"));
-    }
-
-    @Test
-    void authenticateUsernameNotFound() throws Exception {
-
-        AuthRequest authRequest = new AuthRequest("NotInDB@gmail.com", "password1234");
-        given(accountRepo.findAccountByUsername(authRequest.getUsername())).willReturn(java.util.Optional.empty());
-
-        mvc.perform(post("/api/v1/account/authenticate").contentType(MediaType.APPLICATION_JSON)
-                            .content(asJsonString(authRequest))).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()))
-                .andExpect(status().reason("Username or Password was incorrect"));
-    }
-
-    @Test
-    void authenticateFieldsNotFilled() throws Exception {
-        AuthRequest authRequest = new AuthRequest(null, "password");
-        mvc.perform(post("/api/v1/account/authenticate").contentType(MediaType.APPLICATION_JSON)
-                            .content(asJsonString(authRequest))).andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
-                .andExpect(status().reason("'username' or 'password' fields not found"));
-    }
-
-    @Test
-    @WithMockUser(username = "test@gmail.com")
+    @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void updateAccount() throws Exception {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password", AccountRole.ROLE_USER);
+        account.setId(1);
         Map<String, String> accountDetails = new HashMap<>();
         accountDetails.put("first_name", "Zachary");
         accountDetails.put("username", "changedEmail");
         accountDetails.put("password", "newPassword");
+        given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
 
         mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON)
                             .content(asJsonString(accountDetails))).andExpect(status().isOk())
-                .andExpect(content().string("Updated Account"));
+                .andExpect(content().string("Updated account"));
 
         ArgumentCaptor<Account> accountCaptor = ArgumentCaptor.forClass(Account.class);
 
@@ -142,15 +116,17 @@ class AccountControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
+    @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void updateAccountUsernameAlreadyExists() throws Exception {
         Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
-        Map<String, Object> accountDetails = new HashMap<>();
+        account.setId(1);
+        Map<String, String> accountDetails = new HashMap<>();
         accountDetails.put("first_name", "Zachary");
         accountDetails.put("username", "changedEmail");
         given(accountRepo.findById(1)).willReturn(java.util.Optional.of(account));
-        given(accountRepo.findAccountByUsername(accountDetails.get("username")
-                                                        .toString())).willReturn(java.util.Optional.of(account));
+        given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
+        given(accountRepo.findAccountByUsername(accountDetails.get("username"))).willReturn(java.util.Optional.of(account));
+
         mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON)
                             .content(asJsonString(accountDetails))).andExpect(status().is(HttpStatus.CONFLICT.value()))
                 .andExpect(status().reason("Username is already in use"));
@@ -158,8 +134,11 @@ class AccountControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
+    @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void updateAccountDoesntExist() throws Exception {
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
+        account.setId(1);
+        given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
         mvc.perform(put("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
@@ -168,20 +147,36 @@ class AccountControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
+    @WithMockUser(username = "NotZach@gmail.com")
+    void updateNotCorrectRoleAndUsername() throws Exception {
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
+        account.setId(1);
+        given(accountRepo.findAccountByUsername("NotZach@gmail.com")).willReturn(java.util.Optional.of(account));
+        mvc.perform(put("/api/v1/account/" + 2).contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().is(HttpStatus.FORBIDDEN.value()))
+                .andExpect(status().reason("Forbidden"));
+        verify(accountRepo, never()).save(any());
+    }
+
+    @Test
+    @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void deleteAccount() throws Exception {
         String password = "password1234";
-        Account account =
-                new Account("Zach", "Warunek", "Zach@gmail.com", passwordEncoder.encode(password), AccountRole.ROLE_USER);
+        Account account = new Account("Zach",
+                                      "Warunek",
+                                      "Zach@gmail.com",
+                                      passwordEncoder.encode(password),
+                                      AccountRole.ROLE_USER);
         account.setId(1);
         given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.of(account));
+        given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
 
         mvc.perform(delete("/api/v1/account/" + account.getId()).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andExpect(content().string("Deleted Account"));
+                .andExpect(status().isOk()).andExpect(content().string("Deleted account"));
 
         ArgumentCaptor<Account> accountCaptor = ArgumentCaptor.forClass(Account.class);
         ArgumentCaptor<Integer> accountIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(confirmationTokenService).deleteAllAtAccountId(accountCaptor.capture());
+        verify(confirmationTokenRepo).deleteAllByAccountId(accountCaptor.capture());
         verify(accountRepo).deleteById(accountIdCaptor.capture());
 
         assertEquals(account, accountCaptor.getValue());
@@ -190,13 +185,20 @@ class AccountControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
+    @WithMockUser(username = "Zach@gmail.com", roles = {"ADMIN"})
     void deleteAccountNotFound() throws Exception {
+        Account account = new Account("Zach",
+                                      "Warunek",
+                                      "Zach@gmail.com",
+                                      passwordEncoder.encode("password"),
+                                      AccountRole.ROLE_USER);
+        account.setId(1);
+        given(accountRepo.findAccountByUsername(account.getUsername())).willReturn(java.util.Optional.of(account));
         given(accountRepo.findById(1)).willReturn(java.util.Optional.empty());
         mvc.perform(delete("/api/v1/account/" + 1).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
                 .andExpect(status().reason("Account with id " + 1 + " doesn't exist"));
-        verify(confirmationTokenService, never()).deleteAllAtAccountId(any());
+        verify(confirmationTokenRepo, never()).deleteAllByAccountId(any());
         verify(accountRepo, never()).deleteById(any());
     }
 }

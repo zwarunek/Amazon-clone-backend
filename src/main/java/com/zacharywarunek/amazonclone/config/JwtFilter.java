@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -37,8 +38,13 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            UserDetails userDetails = accountService.loadUserByUsername(username);
+            UserDetails userDetails;
+            try {
+                userDetails = accountService.loadUserByUsername(username);
+            } catch(ResponseStatusException e) {
+                res.sendError(e.getRawStatusCode(), e.getReason());
+                return;
+            }
 
             if(jwtTokenUtil.validateToken(authToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authentication =

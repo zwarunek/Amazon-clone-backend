@@ -11,12 +11,15 @@ import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenServic
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -49,6 +52,8 @@ class RegistrationControllerTest {
     RegistrationService registrationService;
     @MockBean
     AccountRepo accountRepo;
+    @Mock
+    JavaMailSender mailSender;
     @MockBean
     ConfirmationTokenRepo confirmationTokenRepo;
     @Autowired
@@ -56,9 +61,10 @@ class RegistrationControllerTest {
     @InjectMocks
     private BCryptPasswordEncoder passwordEncoder;
 
-    public static String asJsonString(final Object obj) {
+    public static String toJson(final Object obj) {
         try {
             final ObjectMapper mapper = new ObjectMapper();
+            mapper.findAndRegisterModules();
             return mapper.writeValueAsString(obj);
         } catch(Exception e) {
             throw new RuntimeException(e);
@@ -72,11 +78,10 @@ class RegistrationControllerTest {
 
     @Test
     void register() throws Exception {
-        RegistrationRequest request =
-                new RegistrationRequest("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234");
+        RegistrationRequest request = new RegistrationRequest("Zach", "Warunek", "Zach@gmail.com", "password1234");
 
         given(accountRepo.checkIfUsernameExists(anyString())).willReturn(false);
-        mvc.perform(post("/api/v1/registration").contentType(MediaType.APPLICATION_JSON).content(asJsonString(request)))
+        mvc.perform(post("/api/v1/registration").contentType(MediaType.APPLICATION_JSON).content(toJson(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Registration Successful: Email confirmation sent")).andReturn()
                 .getResponse();
@@ -96,11 +101,10 @@ class RegistrationControllerTest {
 
     @Test
     void registerUsernameTaken() throws Exception {
-        RegistrationRequest request =
-                new RegistrationRequest("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234");
+        RegistrationRequest request = new RegistrationRequest("Zach", "Warunek", "Zach@gmail.com", "password1234");
 
         given(accountRepo.checkIfUsernameExists(anyString())).willReturn(true);
-        mvc.perform(post("/api/v1/registration").contentType(MediaType.APPLICATION_JSON).content(asJsonString(request)))
+        mvc.perform(post("/api/v1/registration").contentType(MediaType.APPLICATION_JSON).content(toJson(request)))
                 .andExpect(status().is(409)).andExpect(status().reason(
                         "An account with that email " + request.getUsername() + " " + "already exists")).andReturn()
                 .getResponse();
@@ -109,8 +113,30 @@ class RegistrationControllerTest {
     }
 
     @Test
+    void registerNullValues() throws Exception {
+        RegistrationRequest request = new RegistrationRequest("Zach", "Warunek", null, null);
+
+        mvc.perform(post("/api/v1/registration").contentType(MediaType.APPLICATION_JSON).content(toJson(request)))
+                .andExpect(status().is(400))
+                .andExpect(status().reason("An error occurred when creating the account: Null values present"))
+                .andReturn().getResponse();
+        verify(accountRepo, never()).checkIfUsernameExists(anyString());
+        verify(confirmationTokenRepo, never()).updateConfirmedAt(any(), any());
+        verify(accountRepo, never()).enableAccount(any());
+    }
+
+    @Test
+    void registerEmailError() throws Exception {
+        RegistrationRequest request = new RegistrationRequest("Zach", "Warunek", "@INVALID_EMAIL", "password1234");
+
+        mvc.perform(post("/api/v1/registration").contentType(MediaType.APPLICATION_JSON).content(toJson(request)))
+                .andExpect(status().isOk()).andReturn().getResponse();
+    }
+
+    @Test
     void confirm() throws Exception {
-        Account account = new Account("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234", AccountRole.ROLE_USER);
+        Account account =
+                new Account("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234", AccountRole.ROLE_USER);
 
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken =
@@ -118,9 +144,9 @@ class RegistrationControllerTest {
 
         given(confirmationTokenRepo.findByToken(anyString())).willReturn(Optional.of(confirmationToken));
         given(accountRepo.checkIfUsernameExists(anyString())).willReturn(true);
-        System.out.println(asJsonString(account));
         mvc.perform(get("/api/v1/registration/confirm?token=" + confirmationToken.getToken()))
-                .andExpect(status().isOk()).andExpect(content().string("Confirmation Successful")).andReturn()
+                .andExpect(status().isOk())
+                .andExpect(content().string("Confirmation Successful: Account has been confirmed")).andReturn()
                 .getResponse();
         ArgumentCaptor<String> tokenCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> usernameCaptor = ArgumentCaptor.forClass(String.class);
@@ -130,6 +156,88 @@ class RegistrationControllerTest {
 
         assertThat(tokenCaptor.getValue()).isEqualTo(token);
         assertThat(usernameCaptor.getValue()).isEqualTo(account.getUsername());
+
+    }
+
+    @Test
+    void accountAlreadyConfirmed() throws Exception {
+        Account account =
+                new Account("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234", AccountRole.ROLE_USER);
+
+        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
+        confirmationToken.setConfirmed_at(LocalDateTime.now());
+
+        given(confirmationTokenRepo.findByToken(anyString())).willReturn(Optional.of(confirmationToken));
+        given(accountRepo.checkIfUsernameExists(anyString())).willReturn(true);
+        mvc.perform(get("/api/v1/registration/confirm?token=" + confirmationToken.getToken()))
+                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
+                .andExpect(status().reason("email already confirmed")).andReturn().getResponse();
+
+        verify(confirmationTokenRepo, never()).updateConfirmedAt(any(), any());
+        verify(accountRepo, never()).enableAccount(any());
+
+    }
+
+    @Test
+    void confirmationTokenUserNotFound() throws Exception {
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
+
+        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().plusMinutes(15), account);
+
+        given(confirmationTokenRepo.findByToken(anyString())).willReturn(Optional.of(confirmationToken));
+        given(accountRepo.checkIfUsernameExists(anyString())).willReturn(false);
+        mvc.perform(get("/api/v1/registration/confirm?token=" + confirmationToken.getToken()))
+                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+                .andExpect(status().reason("Account with username Zach@gmail.com doesn't exist")).andReturn()
+                .getResponse();
+
+        verify(confirmationTokenRepo, never()).updateConfirmedAt(any(), any());
+        verify(accountRepo, never()).enableAccount(any());
+
+    }
+
+    @Test
+    void confirmationTokenInvalid() throws Exception {
+        Account account = new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
+
+        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now().plusMinutes(15), LocalDateTime.now().plusMinutes(30),
+                                      account);
+
+        given(confirmationTokenRepo.findByToken(anyString())).willReturn(Optional.of(confirmationToken));
+        given(accountRepo.checkIfUsernameExists(anyString())).willReturn(false);
+        mvc.perform(get("/api/v1/registration/confirm?token=" + confirmationToken.getToken()))
+                .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()))
+                .andExpect(status().reason("token is invalid")).andReturn()
+                .getResponse();
+
+        verify(confirmationTokenRepo, never()).updateConfirmedAt(any(), any());
+        verify(accountRepo, never()).enableAccount(any());
+
+    }
+
+    @Test
+    void accountTokenExpired() throws Exception {
+        Account account =
+                new Account("Zach", "Warunek", "gfdgbfdgsdf@gmail.com", "password1234", AccountRole.ROLE_USER);
+
+        String token = UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken =
+                new ConfirmationToken(token, LocalDateTime.now(), LocalDateTime.now().minusMinutes(15), account);
+
+        given(confirmationTokenRepo.findByToken(anyString())).willReturn(Optional.of(confirmationToken));
+        given(accountRepo.checkIfUsernameExists(anyString())).willReturn(true);
+        mvc.perform(get("/api/v1/registration/confirm?token=" + confirmationToken.getToken()))
+                .andExpect(status().is(HttpStatus.UNAUTHORIZED.value())).andExpect(status().reason("token is expired"))
+                .andReturn().getResponse();
+
+        verify(confirmationTokenRepo, never()).updateConfirmedAt(any(), any());
+        verify(accountRepo, never()).enableAccount(any());
 
     }
 }

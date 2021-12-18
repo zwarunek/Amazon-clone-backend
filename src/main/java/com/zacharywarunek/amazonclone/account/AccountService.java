@@ -5,6 +5,7 @@ import com.zacharywarunek.amazonclone.registration.token.ConfirmationToken;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
 import com.zacharywarunek.amazonclone.util.BeansUtil;
+import lombok.AllArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class AccountService implements UserDetailsService {
 
     protected final Log logger = LogFactory.getLog(getClass());
@@ -31,16 +33,6 @@ public class AccountService implements UserDetailsService {
     private final ConfirmationTokenService confirmationTokenService;
     AccountRepo accountRepo;
     JwtUtil jwtUtil;
-
-    @Autowired
-    public AccountService(AccountRepo accountRepo, JwtUtil jwtUtil, PasswordEncoder passwordEncoder,
-                          ConfirmationTokenService confirmationTokenService) {
-        this.accountRepo = accountRepo;
-        this.jwtUtil = jwtUtil;
-        this.passwordEncoder = passwordEncoder;
-        this.confirmationTokenService = confirmationTokenService;
-    }
-
 
     public List<Account> getAllAccounts() {
         return accountRepo.findAll();
@@ -111,16 +103,13 @@ public class AccountService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Account> account = accountRepo.findAccountByUsername(username);
-        if(account.isPresent()) {
-            return new User(account.get().getUsername(), account.get().getPassword(), account.get().getAuthorities());
+        if(!account.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with username " + username + " doesn't exist");
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Account with username " + username + " doesn't exist");
+        return new User(account.get().getUsername(), account.get().getPassword(), account.get().getAuthorities());
     }
 
     public void enableAccount(String username) {
-        if(!accountRepo.checkIfUsernameExists(username))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                              "Account with username " + username + " doesn't exist");
         accountRepo.enableAccount(username);
     }
 }

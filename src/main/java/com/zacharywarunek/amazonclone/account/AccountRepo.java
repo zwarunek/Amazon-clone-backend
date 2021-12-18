@@ -1,6 +1,6 @@
 package com.zacharywarunek.amazonclone.account;
 
-import com.zacharywarunek.amazonclone.repositories.JPA.IJPABaseRepo;
+import com.zacharywarunek.amazonclone.util.JPA.IJPABaseRepo;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;

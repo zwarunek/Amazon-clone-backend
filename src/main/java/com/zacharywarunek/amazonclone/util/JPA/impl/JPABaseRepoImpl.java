@@ -1,6 +1,6 @@
-package com.zacharywarunek.amazonclone.repositories.JPA.impl;
+package com.zacharywarunek.amazonclone.util.JPA.impl;
 
-import com.zacharywarunek.amazonclone.repositories.JPA.IJPABaseRepo;
+import com.zacharywarunek.amazonclone.util.JPA.IJPABaseRepo;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 

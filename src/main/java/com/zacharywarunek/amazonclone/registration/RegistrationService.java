@@ -1,10 +1,10 @@
 package com.zacharywarunek.amazonclone.registration;
 
-import com.zacharywarunek.amazonclone.ResponseObject;
 import com.zacharywarunek.amazonclone.account.Account;
+import com.zacharywarunek.amazonclone.account.AccountRepo;
 import com.zacharywarunek.amazonclone.account.AccountRole;
 import com.zacharywarunek.amazonclone.account.AccountService;
-import com.zacharywarunek.amazonclone.email.EmailSender;
+import com.zacharywarunek.amazonclone.email.EmailService;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationToken;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -20,48 +21,42 @@ import java.time.LocalDateTime;
 public class RegistrationService {
 
     private final AccountService accountService;
+    private final AccountRepo accountRepo;
     private final ConfirmationTokenService confirmationTokenService;
-    private final EmailSender emailSender;
+    private final EmailService emailService;
 
     public ResponseEntity<Object> register(RegistrationRequest request) {
 
-        String token = accountService.register(
-                new Account(request.getFirstName(), request.getLastName(), request.getUsername(), request.getPassword(),
-                        AccountRole.ROLE_USER
+        String token = accountService.register(new Account(request.getFirstName(),
+                                                           request.getLastName(),
+                                                           request.getUsername(),
+                                                           request.getPassword(),
+                                                           AccountRole.ROLE_USER
 
-                ));
+        ));
 
         String link = System.getenv("URL") + "/api/v1/registration/confirm?token=" + token;
-        emailSender.send(request.getUsername(), buildEmail(request.getFirstName(), link));
-        ResponseObject responseObject = new ResponseObject();
-        responseObject.setStatus(HttpStatus.OK.value());
-        responseObject.setMessage("Registration Successful");
-        responseObject.setData("Email confirmation sent");
-        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+        emailService.send(request.getUsername(), buildEmail(request.getFirstName(), link));
+        return ResponseEntity.ok().body("Registration Successful: Email confirmation sent");
     }
 
     @Transactional
     public ResponseEntity<Object> confirmToken(String token) {
         ConfirmationToken confirmationToken = confirmationTokenService.getToken(token)
-                .orElseThrow(() -> new IllegalStateException("token not found"));
-
-        if(confirmationToken.getConfirmed_at() != null) {
-            throw new IllegalStateException("email already confirmed");
-        }
-
-        LocalDateTime expiredAt = confirmationToken.getExpires_at();
-
-        if(expiredAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("token expired");
-        }
-
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "token not found"));
+        if(confirmationToken.getCreated_at().isAfter(LocalDateTime.now()))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "token is invalid");
+        if(!accountRepo.checkIfUsernameExists(confirmationToken.getAccount().getUsername()))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                              "Account with username " + confirmationToken.getAccount().getUsername() +
+                                                      " doesn't exist");
+        if(confirmationToken.getConfirmed_at() != null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email already confirmed");
+        if(confirmationToken.getExpires_at().isBefore(LocalDateTime.now()))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "token is expired");
         confirmationTokenService.setConfirmedAt(token);
         accountService.enableAccount(confirmationToken.getAccount().getUsername());
-        ResponseObject responseObject = new ResponseObject();
-        responseObject.setStatus(HttpStatus.OK.value());
-        responseObject.setMessage("Confirmation Successful");
-        responseObject.setData("Account has been confirmed");
-        return new ResponseEntity<>(responseObject, HttpStatus.OK);
+        return ResponseEntity.ok().body("Confirmation Successful: Account has been confirmed");
     }
 
     private String buildEmail(String name, String link) {

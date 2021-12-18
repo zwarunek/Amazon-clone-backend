@@ -1,20 +1,17 @@
 package com.zacharywarunek.amazonclone.registration;
 
 import com.zacharywarunek.amazonclone.account.Account;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping(path = "api/v1/registration")
 public class RegistrationController {
 
     private final RegistrationService registrationService;
-
-    @Autowired
-    public RegistrationController(RegistrationService registrationService) {
-        this.registrationService = registrationService;
-    }
 
     @PostMapping
     public ResponseEntity<Object> register(@RequestBody RegistrationRequest request) {
