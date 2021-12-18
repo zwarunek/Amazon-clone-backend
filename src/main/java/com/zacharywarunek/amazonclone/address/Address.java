@@ -19,6 +19,7 @@ public class Address implements Serializable {
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
+    private String address;
     private String city;
     private String state;
     private int zipcode;
@@ -26,10 +27,12 @@ public class Address implements Serializable {
     private String first_name;
     private String last_name;
 
-    public Address(Account account, String city, String state, int zipcode, boolean favorite, String first_name,
+    public Address(Account account, String address, String city, String state, int zipcode, boolean favorite,
+                   String first_name,
                    String last_name) {
 
         this.account = account;
+        this.address = address;
         this.city = city;
         this.state = state;
         this.zipcode = zipcode;
@@ -40,8 +43,8 @@ public class Address implements Serializable {
     @Override
     public String toString() {
         return String.format(
-                "Address [id=%s, city=%s, state=%s, zipcode=%s, favorite=%s, first_name=%s, last_name=%s]",
-                id, city, state, zipcode, favorite, first_name, last_name);
+                "Address [id=%s, account=%s, city=%s, state=%s, zipcode=%s, favorite=%s, first_name=%s, last_name=%s]",
+                id, account, city, state, zipcode, favorite, first_name, last_name);
     }
 
 }

@@ -9,7 +9,6 @@ import java.util.Optional;
 
 public interface AccountRepo extends IJPABaseRepo<Account> {
 
-    @Query(value = "SELECT * FROM Account WHERE username=?", nativeQuery = true)
     Optional<Account> findAccountByUsername(String username);
 
     @Query(value = "SELECT CAST(" +

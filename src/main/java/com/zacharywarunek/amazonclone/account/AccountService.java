@@ -82,12 +82,18 @@ public class AccountService implements UserDetailsService {
         if(accountDetails.getUsername() != null && !accountDetails.getUsername().equals(account.getUsername()))
             if(accountRepo.findAccountByUsername(accountDetails.getUsername()).isPresent())
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Username is already in use");
+            else
+                account.setUsername(accountDetails.getUsername());
         if(accountDetails.getPassword() != null)
-            accountDetails.setPassword(passwordEncoder.encode(accountDetails.getPassword()));
-
-        BeansUtil<Account> beansUtil = new BeansUtil<>();
-        beansUtil.copyNonNullProperties(account, accountDetails);
-        accountRepo.save(account);
+            account.setPassword(passwordEncoder.encode(accountDetails.getPassword()));
+        if(accountDetails.getFirst_name() != null && !accountDetails.getFirst_name().equals(account.getFirst_name()))
+            account.setFirst_name(accountDetails.getFirst_name());
+        if(accountDetails.getFirst_name() != null && !accountDetails.getFirst_name().equals(account.getFirst_name()))
+            account.setLast_name(accountDetails.getLast_name());
+        logger.info(account.toString());
+//        BeansUtil<Account> beansUtil = new BeansUtil<>();
+//        beansUtil.copyNonNullProperties(account, accountDetails);
+//        accountRepo.save(account);
         return ResponseEntity.ok().body("Updated account");
     }
 

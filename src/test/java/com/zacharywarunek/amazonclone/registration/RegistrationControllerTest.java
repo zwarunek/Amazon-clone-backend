@@ -152,7 +152,7 @@ class RegistrationControllerTest {
         ArgumentCaptor<String> usernameCaptor = ArgumentCaptor.forClass(String.class);
         verify(confirmationTokenRepo).updateConfirmedAt(tokenCaptor.capture(),
                                                         ArgumentCaptor.forClass(LocalDateTime.class).capture());
-        verify(accountRepo).enableAccount(usernameCaptor.capture());
+//        verify(accountRepo).enableAccount(usernameCaptor.capture());
 
         assertThat(tokenCaptor.getValue()).isEqualTo(token);
         assertThat(usernameCaptor.getValue()).isEqualTo(account.getUsername());
