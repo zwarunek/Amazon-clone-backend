@@ -40,12 +40,6 @@ class AccountServiceTest {
     @InjectMocks
     private AccountService accountService;
 
-    @BeforeEach
-    void setUp() {
-        accountService = new AccountService(passwordEncoder, confirmationTokenService, accountRepo,
-                                            addressRepo, jwtUtil);
-    }
-
     @Test
     void getAllAccounts() {
         accountService.getAllAccounts();
