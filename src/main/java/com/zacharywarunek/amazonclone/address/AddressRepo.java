@@ -11,24 +11,24 @@ import java.util.Optional;
 
 public interface AddressRepo extends IJPABaseRepo<Address> {
 
-    @Query(value = "SELECT a FROM Address a WHERE a.account = :account")
-    List<Address> findAddressByAccount(Account account);
+  @Query(value = "SELECT a FROM Address a WHERE a.account = :account")
+  List<Address> findAddressByAccount(Account account);
 
-    @Query(value = "SELECT a FROM Address a WHERE a.account = :account AND a.favorite = TRUE")
-    Optional<Address> findFavoriteAddressByAccount(Account account);
+  @Query(value = "SELECT a FROM Address a WHERE a.account = :account AND a.favorite = TRUE")
+  Optional<Address> findFavoriteAddressByAccount(Account account);
 
-    @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Address a WHERE a.account = :account")
-    int deleteAllAtAccount(Account account);
+  @Transactional
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("DELETE FROM Address a WHERE a.account = :account")
+  int deleteAllAtAccount(Account account);
 
-    @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE Address a SET a.favorite = TRUE WHERE a.id = :id")
-    int setFavorite(Long id);
+  @Transactional
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("UPDATE Address a SET a.favorite = TRUE WHERE a.id = :id")
+  int setFavorite(Long id);
 
-    @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE Address a SET a.favorite = FALSE WHERE a.account = :account")
-    int resetFavorite(Account account);
+  @Transactional
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("UPDATE Address a SET a.favorite = FALSE WHERE a.account = :account")
+  int resetFavorite(Account account);
 }

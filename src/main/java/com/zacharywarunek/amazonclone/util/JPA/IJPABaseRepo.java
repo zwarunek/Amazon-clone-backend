@@ -7,5 +7,5 @@ import java.io.Serializable;
 
 @NoRepositoryBean
 public interface IJPABaseRepo<T> extends JpaRepository<T, Serializable> {
-    <S extends T> S save(S entity);
+  <S extends T> S save(S entity);
 }

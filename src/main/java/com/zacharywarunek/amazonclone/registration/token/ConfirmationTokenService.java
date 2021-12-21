@@ -11,21 +11,21 @@ import java.util.Optional;
 @AllArgsConstructor
 public class ConfirmationTokenService {
 
-    private final ConfirmationTokenRepo confirmationTokenRepo;
+  private final ConfirmationTokenRepo confirmationTokenRepo;
 
-    public void saveConfirmationToken(ConfirmationToken token) {
-        confirmationTokenRepo.save(token);
-    }
+  public void saveConfirmationToken(ConfirmationToken token) {
+    confirmationTokenRepo.save(token);
+  }
 
-    public Optional<ConfirmationToken> getToken(String token) {
-        return confirmationTokenRepo.findByToken(token);
-    }
+  public Optional<ConfirmationToken> getToken(String token) {
+    return confirmationTokenRepo.findByToken(token);
+  }
 
-    public void setConfirmedAt(String token) {
-        confirmationTokenRepo.updateConfirmedAt(token, LocalDateTime.now());
-    }
+  public void setConfirmedAt(String token) {
+    confirmationTokenRepo.updateConfirmedAt(token, LocalDateTime.now());
+  }
 
-    public void deleteAllAtAccount(Account account) {
-        confirmationTokenRepo.deleteAllByAccountId(account);
-    }
+  public void deleteAllAtAccount(Account account) {
+    confirmationTokenRepo.deleteAllByAccountId(account);
+  }
 }
