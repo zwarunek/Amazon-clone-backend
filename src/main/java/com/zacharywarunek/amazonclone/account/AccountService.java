@@ -2,10 +2,7 @@ package com.zacharywarunek.amazonclone.account;
 
 import com.zacharywarunek.amazonclone.address.AddressRepo;
 import com.zacharywarunek.amazonclone.config.JwtUtil;
-import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
-import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
-import com.zacharywarunek.amazonclone.exceptions.UnauthorizedException;
-import com.zacharywarunek.amazonclone.exceptions.UsernameTakenException;
+import com.zacharywarunek.amazonclone.exceptions.*;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationToken;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
@@ -46,9 +43,11 @@ public class AccountService implements UserDetailsService {
     if (account.getPassword() == null
         || account.getUsername() == null
         || account.getLast_name() == null
-        || account.getFirst_name() == null) throw new BadRequestException();
+        || account.getFirst_name() == null)
+      throw new BadRequestException(ExceptionResponses.NULL_VALUES.label);
     if (accountRepo.checkIfUsernameExists(account.getUsername()))
-      throw new UsernameTakenException(account.getUsername());
+      throw new UsernameTakenException(
+          String.format(ExceptionResponses.USERNAME_TAKEN.label, account.getUsername()));
 
     account.setPassword(passwordEncoder.encode(account.getPassword()));
     accountRepo.save(account);
@@ -65,7 +64,7 @@ public class AccountService implements UserDetailsService {
   public String authenticate(AuthRequest authRequest)
       throws BadRequestException, UnauthorizedException {
     if (authRequest.getUsername() == null || authRequest.getPassword() == null)
-      throw new BadRequestException(NULL_VALUES.name());
+      throw new BadRequestException(NULL_VALUES.label);
     Optional<Account> accountOptional =
         accountRepo.findAccountByUsername(authRequest.getUsername());
     if (!accountOptional.isPresent()
@@ -96,7 +95,7 @@ public class AccountService implements UserDetailsService {
         && !accountDetails.getFirst_name().equals(account.getFirst_name()))
       account.setFirst_name(accountDetails.getFirst_name());
     if (accountDetails.getFirst_name() != null
-        && !accountDetails.getFirst_name().equals(account.getFirst_name()))
+        && !accountDetails.getLast_name().equals(account.getLast_name()))
       account.setLast_name(accountDetails.getLast_name());
     return account;
   }

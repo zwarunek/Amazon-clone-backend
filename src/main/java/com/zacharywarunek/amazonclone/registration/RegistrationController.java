@@ -19,12 +19,10 @@ public class RegistrationController {
     try {
       return ResponseEntity.ok(registrationService.register(request));
     } catch (UsernameTakenException e) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          String.format(ExceptionResponses.USERNAME_TAKEN.label, e.accountUsername));
+      throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
     } catch (BadRequestException e) {
       throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, ExceptionResponses.NULL_VALUES.label);
+          HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 
