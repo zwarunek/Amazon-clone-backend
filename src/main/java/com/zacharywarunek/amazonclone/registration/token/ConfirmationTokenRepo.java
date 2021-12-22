@@ -1,6 +1,7 @@
 package com.zacharywarunek.amazonclone.registration.token;
 
 import com.zacharywarunek.amazonclone.account.Account;
+import com.zacharywarunek.amazonclone.util.JPA.IJPABaseRepo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,17 +13,17 @@ import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
-public interface ConfirmationTokenRepo extends JpaRepository<ConfirmationToken, Long> {
+public interface ConfirmationTokenRepo extends IJPABaseRepo<ConfirmationToken> {
 
-    Optional<ConfirmationToken> findByToken(String token);
+  Optional<ConfirmationToken> findByToken(String token);
 
-    @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("UPDATE ConfirmationToken c " + "SET c.confirmed_at = ?2 " + "WHERE c.token = ?1")
-    void updateConfirmedAt(String token, LocalDateTime confirmedAt);
+  @Transactional
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("UPDATE ConfirmationToken c " + "SET c.confirmed_at = ?2 " + "WHERE c.token = ?1")
+  void updateConfirmedAt(String token, LocalDateTime confirmedAt);
 
-    @Transactional
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM ConfirmationToken WHERE account = ?1")
-    int deleteAllByAccountId(Account account);
+  @Transactional
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("DELETE FROM ConfirmationToken WHERE account = ?1")
+  int deleteAllByAccountId(Account account);
 }
