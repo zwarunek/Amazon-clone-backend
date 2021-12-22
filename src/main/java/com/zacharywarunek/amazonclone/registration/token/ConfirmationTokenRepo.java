@@ -1,6 +1,7 @@
 package com.zacharywarunek.amazonclone.registration.token;
 
 import com.zacharywarunek.amazonclone.account.Account;
+import com.zacharywarunek.amazonclone.util.JPA.IJPABaseRepo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
-public interface ConfirmationTokenRepo extends JpaRepository<ConfirmationToken, Long> {
+public interface ConfirmationTokenRepo extends IJPABaseRepo<ConfirmationToken> {
 
   Optional<ConfirmationToken> findByToken(String token);
 
