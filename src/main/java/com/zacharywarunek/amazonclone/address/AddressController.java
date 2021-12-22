@@ -73,6 +73,8 @@ public class AddressController {
       addressService.setFavorite(account_id, address_id);
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch(UnauthorizedException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
     return ResponseEntity.ok("Address with id " + address_id + " is now the favorite address");
   }
