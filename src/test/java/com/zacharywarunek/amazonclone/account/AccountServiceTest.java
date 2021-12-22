@@ -40,14 +40,14 @@ class AccountServiceTest {
   private Account account;
   private AuthRequest authRequest;
   private String password;
-  private Account accountDetails;
+  private AccountDetails accountDetails;
 
   @BeforeEach
   void setupAccount() {
     password = "password1234";
     account = new Account("Zach", "Warunek", "Zach@gmail.com", password, AccountRole.ROLE_USER);
     accountDetails =
-        new Account("FNChanged", "LNchanged", "Zachdfsdsa@gmail.com", "something", null);
+        new AccountDetails("FNChanged", "LNchanged", "Zachdfsdsa@gmail.com", "something");
     authRequest = new AuthRequest("Zach@gmail.com", password);
   }
 

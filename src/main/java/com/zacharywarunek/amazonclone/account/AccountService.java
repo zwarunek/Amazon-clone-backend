@@ -74,7 +74,7 @@ public class AccountService implements UserDetailsService {
   }
 
   @Transactional
-  public Account updateAccount(Long account_id, Account accountDetails)
+  public Account updateAccount(Long account_id, AccountDetails accountDetails)
       throws EntityNotFoundException, UsernameTakenException {
     Account account =
         accountRepo

@@ -28,9 +28,9 @@ public class AccountController {
 
   @PutMapping(path = "{account_id}")
   public ResponseEntity<Account> updateAccount(
-      @PathVariable("account_id") Long account_id, @RequestBody Account account) {
+      @PathVariable("account_id") Long account_id, @RequestBody AccountDetails accountDetails) {
     try {
-      return ResponseEntity.ok(accountService.updateAccount(account_id, account));
+      return ResponseEntity.ok(accountService.updateAccount(account_id, accountDetails));
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (UsernameTakenException e) {
@@ -39,10 +39,10 @@ public class AccountController {
   }
 
   @DeleteMapping(path = "{account_id}")
-  public ResponseEntity<Account> deleteAccount(@PathVariable("account_id") Long account_id) {
+  public ResponseEntity<String> deleteAccount(@PathVariable("account_id") Long account_id) {
     try {
       accountService.deleteAccount(account_id);
-      return ResponseEntity.ok().build();
+      return ResponseEntity.ok("Deleted account");
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }

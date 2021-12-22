@@ -42,20 +42,6 @@ public class Account implements UserDetails {
   }
 
   @Override
-  public String toString() {
-    return String.format(
-        "Account [id=%s, first_name=%s, last_name=%s, password=%s, username=%s, role=%s, enabled=%s, locked=%s]",
-        id,
-        first_name,
-        last_name,
-        password,
-        username,
-        role != null ? role.name() : null,
-        enabled,
-        locked);
-  }
-
-  @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
   }
