@@ -14,7 +14,8 @@ public enum ExceptionResponses {
   EMAIL_ALREADY_CONFIRMED("Email already confirmed"),
   NO_FAVORITE_ADDRESS("Account with id %s has no favorite address"),
   ADDRESS_NOT_FOUND("Address with id %s not found"),
-  ADDRESS_UNAUTHORIZED("Address with id %s does not belong to account with id %s");
+  ADDRESS_UNAUTHORIZED("Address with id %s does not belong to account with id %s"),
+  PAYMENT_TYPE_ID_NOT_FOUND("Payment type with id %s not found");
 
   public final String label;
 
