@@ -48,11 +48,4 @@ public class Address implements Serializable {
     this.first_name = first_name;
     this.last_name = last_name;
   }
-
-  @Override
-  public String toString() {
-    return String.format(
-        "Address [id=%s, account=%s, city=%s, state=%s, zipcode=%s, favorite=%s, first_name=%s, last_name=%s]",
-        id, account, city, state, zipcode, favorite, first_name, last_name);
-  }
 }

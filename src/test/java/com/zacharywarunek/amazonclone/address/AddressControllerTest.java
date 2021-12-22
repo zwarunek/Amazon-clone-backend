@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.account.AccountRepo;
 import com.zacharywarunek.amazonclone.account.AccountRole;
+import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
+import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
+import com.zacharywarunek.amazonclone.exceptions.UnauthorizedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,15 +20,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,22 +36,42 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureJsonTesters
 class AddressControllerTest {
 
-  @Autowired AddressService addressService;
-  @Autowired AddressRepo addressRepo;
-  @Autowired AccountRepo accountRepo;
+  @MockBean AddressService addressService;
+  @MockBean AddressRepo addressRepo;
+  @MockBean AccountRepo accountRepo;
   @Autowired private MockMvc mvc;
   private ObjectMapper mapper;
-
+  private Address address;
+  private Address addressDetails;
 
   @AfterEach
   void tearDown() {
     addressRepo.deleteAll();
     accountRepo.deleteAll();
   }
+
   @BeforeEach
   void before() {
     mapper = new ObjectMapper();
-    mapper.findAndRegisterModules();
+    Account account = new Account("Zach",
+                                  "Warunek",
+                                  "foo@gmail.com",
+                                  "password1234",
+                                  AccountRole.ROLE_USER);
+    account.setId(1L);
+    address =
+        new Address(account, "testAddress1", "testCity1", "MI", 12345, false, "Zach", "Warunek");
+
+    addressDetails =
+        new Address(
+            null,
+            "changedAddress",
+            "changedCity",
+            "CA",
+            54321,
+            false,
+            "changedFirst",
+            "changedLast");
   }
 
   @Test
@@ -63,23 +83,11 @@ class AddressControllerTest {
   @WithMockUser(
       username = "foo@gmail.com",
       roles = {"ADMIN"})
-  void getAllAddressesAdminSame() throws Exception {
-    Account account1 =
-        new Account("foo", "bar", "foo@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    Address address1 =
-        new Address(account1, "testAddress1", "testCity1", "MI", 12345, false, "Zach", "Warunek");
-    Address address2 =
-        new Address(account1, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-    accountRepo.save(account1);
-    address1.setId(1L);
-    address1.setAccount(account1);
-    address2.setId(2L);
-    address2.setAccount(account1);
-    given(addressRepo.findAddressByAccount(account1)).willReturn(Arrays.asList(address1, address2));
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account1));
+  void getAllAddresses() throws Exception {
+    given(addressService.getAllAddresses(any())).willReturn(Collections.singletonList(address));
     mvc.perform(get("/api/v1/accounts/1/addresses").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().string(mapper.writeValueAsString(Arrays.asList(address1, address2))))
+        .andExpect(content().string(mapper.writeValueAsString(Collections.singletonList(address))))
         .andReturn()
         .getResponse();
   }
@@ -88,80 +96,12 @@ class AddressControllerTest {
   @WithMockUser(
       username = "foo@gmail.com",
       roles = {"ADMIN"})
-  void getAllAddressesAdminOther() throws Exception {
-
-    Account account1 =
-        new Account("foo", "bar", "fooNotEqual@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    Address address1 =
-        new Address(account1, "testAddress1", "testCity1", "MI", 12345, false, "Zach", "Warunek");
-    Address address2 =
-        new Address(account1, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
-    address1.setId(1L);
-    address1.setAccount(account1);
-    address2.setId(2L);
-    address2.setAccount(account1);
-    given(addressRepo.findAddressByAccount(account1)).willReturn(Arrays.asList(address1, address2));
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account1));
-    mvc.perform(get("/api/v1/accounts/1/addresses").accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().string(mapper.writeValueAsString(Arrays.asList(address1, address2))))
-        .andReturn()
-        .getResponse();
-  }
-
-  @Test
-  @WithMockUser(
-      username = "foo@gmail.com",
-      roles = {"USER"})
-  void getAllAddressesUserSame() throws Exception {
-    Account account =
-        new Account("foo", "bar", "foo@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    Address address1 =
-        new Address(account, "testAddress1", "testCity1", "MI", 12345, false, "Zach", "Warunek");
-    Address address2 =
-        new Address(account, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-    account.setId(1L);
-    address1.setId(1L);
-    address1.setAccount(account);
-    address2.setId(2L);
-    address2.setAccount(account);
-    given(addressRepo.findAddressByAccount(account)).willReturn(Arrays.asList(address1, address2));
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
-    given(accountRepo.findAccountByUsername("foo@gmail.com")).willReturn(Optional.of(account));
-    mvc.perform(get("/api/v1/accounts/1/addresses").accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().string(mapper.writeValueAsString(Arrays.asList(address1, address2))))
-        .andReturn()
-        .getResponse();
-  }
-
-  @Test
-  @WithMockUser(
-      username = "foo@gmail.com",
-      roles = {"USER"})
-  void getAllAddressesUserOther() throws Exception {
-    Account account =
-        new Account("foo", "bar", "fooNotEqual@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
-    given(accountRepo.findAccountByUsername("fooNotEqual@gmail.com"))
-        .willReturn(Optional.of(account));
-    mvc.perform(get("/api/v1/accounts/1/addresses").accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(HttpStatus.FORBIDDEN.value()))
-        .andExpect(status().reason("Forbidden"))
-        .andReturn()
-        .getResponse();
-  }
-
-  @Test
-  @WithMockUser(
-      username = "foo@gmail.com",
-      roles = {"ADMIN"})
-  void getAllAddressesAdminOtherNotFound() throws Exception {
-    given(accountRepo.findById(1L)).willReturn(Optional.empty());
+  void getAllAddressesNotFound() throws Exception {
+    when(addressService.getAllAddresses(any()))
+        .thenThrow(new EntityNotFoundException("ACCOUNT NOT FOUND"));
     mvc.perform(get("/api/v1/accounts/1/addresses").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
-        .andExpect(status().reason("Account with id " + 1 + " not found"))
+        .andExpect(status().reason("ACCOUNT NOT FOUND"))
         .andReturn()
         .getResponse();
   }
@@ -170,157 +110,176 @@ class AddressControllerTest {
   @WithMockUser(
       username = "foo@gmail.com",
       roles = {"ADMIN"})
-  void createAddressesAdmin() throws Exception {
-    Address address =
-        new Address(null, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
-    Account account =
-        new Account("foo", "bar", "foodifferent@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
+  void createAddresses() throws Exception {
+    address.setAccount(null);
+    given(addressService.createAddress(any(), any())).willReturn(address);
     mvc.perform(
             post("/api/v1/accounts/1/addresses")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(address)))
         .andExpect(status().isOk())
-        .andExpect(content().string("Address Successfully Created"))
+        .andExpect(content().string(mapper.writeValueAsString(address)))
         .andReturn()
         .getResponse();
-    address.setAccount(account);
-    ArgumentCaptor<Address> addressCaptor = ArgumentCaptor.forClass(Address.class);
-    verify(addressRepo).save(addressCaptor.capture());
-    assertThat(addressCaptor.getValue()).usingRecursiveComparison().isEqualTo(address);
-  }
-
-  @Test
-  @WithMockUser(
-      username = "foo@gmail.com",
-      roles = {"USER"})
-  void createAddressesUserSame() throws Exception {
-    Address address =
-        new Address(null, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
-    Account account =
-        new Account("foo", "bar", "foo@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    account.setId(1L);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
-    given(accountRepo.findAccountByUsername("foo@gmail.com")).willReturn(Optional.of(account));
-    mvc.perform(
-            post("/api/v1/accounts/1/addresses")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(address)))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Address Successfully Created"))
-        .andReturn()
-        .getResponse();
-    address.setAccount(account);
-    ArgumentCaptor<Address> addressCaptor = ArgumentCaptor.forClass(Address.class);
-    verify(addressRepo).save(addressCaptor.capture());
-    assertThat(addressCaptor.getValue()).usingRecursiveComparison().isEqualTo(address);
-  }
-
-  @Test
-  @WithMockUser(
-      username = "foo@gmail.com",
-      roles = {"USER"})
-  void createAddressesUserOther() throws Exception {
-    Address address =
-        new Address(null, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
-    Account account =
-        new Account("foo", "bar", "foodifferent@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    account.setId(1L);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
-    given(accountRepo.findAccountByUsername("foo@gmail.com")).willReturn(Optional.of(account));
-    mvc.perform(
-            post("/api/v1/accounts/1/addresses")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(address)))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Address Successfully Created"))
-        .andReturn()
-        .getResponse();
-    address.setAccount(account);
-    ArgumentCaptor<Address> addressCaptor = ArgumentCaptor.forClass(Address.class);
-    verify(addressRepo).save(addressCaptor.capture());
-    assertThat(addressCaptor.getValue()).usingRecursiveComparison().isEqualTo(address);
   }
 
   @Test
   @WithMockUser(
       username = "foo@gmail.com",
       roles = {"ADMIN"})
-  void createAddressAdminOtherNotFound() throws Exception {
-    Address address =
-        new Address(null, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
-    Account account =
-        new Account("foo", "bar", "foo@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    account.setId(1L);
-    given(accountRepo.findById(1L)).willReturn(Optional.empty());
-    given(accountRepo.findAccountByUsername("foo@gmail.com")).willReturn(Optional.of(account));
+  void createAddressNotFound() throws Exception {
+    address.setAccount(null);
+    when(addressService.createAddress(any(), any()))
+        .thenThrow(new EntityNotFoundException("ACCOUNT NOT FOUND"));
     mvc.perform(
             post("/api/v1/accounts/1/addresses")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(address)))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
-        .andExpect(status().reason("Account with id " + 1 + " not found"))
+        .andExpect(status().reason("ACCOUNT NOT FOUND"))
         .andReturn()
         .getResponse();
-    verify(accountRepo, never()).save(any());
   }
 
   @Test
   @WithMockUser(
       username = "foo@gmail.com",
-      roles = {"USER"})
-  void createAddressesUserNullValues() throws Exception {
-    Address address = new Address(null, null, null, "MI", 12345, false, "Zach", "Warunek");
-
-    Account account =
-        new Account("foo", "bar", "foo@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-    account.setId(1L);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
-    given(accountRepo.findAccountByUsername("foo@gmail.com")).willReturn(Optional.of(account));
+      roles = {"ADMIN"})
+  void createAddressesNullValues() throws Exception {
+    address.setAccount(null);
+    when(addressService.createAddress(any(), any()))
+        .thenThrow(new BadRequestException("NULL VALUES"));
     mvc.perform(
             post("/api/v1/accounts/1/addresses")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(address)))
         .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
-        .andExpect(
-            status()
-                .reason("An error occurred when creating the address: " + "Null values present"))
+        .andExpect(status().reason("NULL VALUES"))
         .andReturn()
         .getResponse();
-    verify(addressRepo, never()).save(any());
   }
-
 
   @Test
   @WithMockUser(
-          username = "foo@gmail.com",
-          roles = {"ADMIN"})
-  void updateAddressesAdmin() throws Exception {
-    Account account =
-          new Account("foo", "bar", "foodifferent@gmail.com", "password1234", AccountRole.ROLE_ADMIN);
-
-    Address address =
-            new Address(account, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-    Address addressDetails =
-            new Address(null, "updated Address", null, "CA", 54321, null, null, null);
-
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
-    given(addressRepo.findById(1L)).willReturn(Optional.of(address));
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void updateAddresses() throws Exception {
+    given(addressService.updateAddress(any(), any(), any())).willReturn(addressDetails);
     mvc.perform(
-                    put("/api/v1/accounts/1/addresses/1")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(mapper.writeValueAsString(addressDetails)))
-            .andExpect(status().isOk())
-            .andExpect(content().string("Address Successfully Created"))
-            .andReturn()
-            .getResponse();
-    address.setAccount(account);
-    ArgumentCaptor<Address> addressCaptor = ArgumentCaptor.forClass(Address.class);
-    verify(addressRepo).save(addressCaptor.capture());
-    assertThat(addressCaptor.getValue()).usingRecursiveComparison().ignoringActualNullFields().isEqualTo(address);
+            put("/api/v1/accounts/1/addresses/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(addressDetails)))
+        .andExpect(status().isOk())
+        .andExpect(content().string(mapper.writeValueAsString(addressDetails)))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void updateAddressesNotFound() throws Exception {
+    given(addressService.updateAddress(any(), any(), any()))
+        .willThrow(new EntityNotFoundException("NOT FOUND"));
+    mvc.perform(
+            put("/api/v1/accounts/1/addresses/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(addressDetails)))
+        .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+        .andExpect(status().reason("NOT FOUND"))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void updateAddressesUnauthorized() throws Exception {
+    given(addressService.updateAddress(any(), any(), any()))
+        .willThrow(new UnauthorizedException("NOT AUTHORIZED"));
+    mvc.perform(
+            put("/api/v1/accounts/1/addresses/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(addressDetails)))
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()))
+        .andExpect(status().reason("NOT AUTHORIZED"))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void getFavoriteAddress() throws Exception {
+    given(addressService.getFavorite(any())).willReturn(address);
+    mvc.perform(get("/api/v1/accounts/1/addresses/favorite").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string(mapper.writeValueAsString(address)))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void getFavoriteAddressNotFound() throws Exception {
+    when(addressService.getFavorite(any()))
+        .thenThrow(new EntityNotFoundException("ACCOUNT NOT FOUND"));
+    mvc.perform(get("/api/v1/accounts/1/addresses/favorite").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+        .andExpect(status().reason("ACCOUNT NOT FOUND"))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void setFavoriteAddress() throws Exception {
+    address.setId(1L);
+    mvc.perform(
+            put("/api/v1/accounts/1/addresses/1/favorite"))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string("Address with id " + address.getId() + " is now the favorite address"))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void setFavoriteAddressNotFound() throws Exception {
+    doThrow(new EntityNotFoundException("NOT FOUND"))
+        .when(addressService)
+        .setFavorite(any(), any());
+    mvc.perform(
+            put("/api/v1/accounts/1/addresses/1/favorite"))
+        .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+        .andExpect(status().reason("NOT FOUND"))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void setFavoriteAddressUnauthorized() throws Exception {
+    doThrow(new UnauthorizedException("NOT AUTHORIZED"))
+        .when(addressService)
+        .setFavorite(any(), any());
+    mvc.perform(
+            put("/api/v1/accounts/1/addresses/1/favorite"))
+        .andExpect(status().is(HttpStatus.UNAUTHORIZED.value()))
+        .andExpect(status().reason("NOT AUTHORIZED"))
+        .andReturn()
+        .getResponse();
   }
 }
