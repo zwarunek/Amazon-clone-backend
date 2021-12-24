@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND;
 
@@ -21,8 +20,13 @@ public class PaymentTypeService {
     return paymentTypeRepo.findAll();
   }
 
-  public Optional<PaymentType> getPaymentTypeById(Long paymentTypeId) {
-    return paymentTypeRepo.findById(paymentTypeId);
+  public PaymentType getPaymentTypeById(Long paymentTypeId) throws EntityNotFoundException {
+    return paymentTypeRepo
+        .findById(paymentTypeId)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(
+                    String.format(PAYMENT_TYPE_ID_NOT_FOUND.label, paymentTypeId)));
   }
 
   public PaymentType createPaymentTypeById(PaymentType paymentTypeDetails)
@@ -35,14 +39,7 @@ public class PaymentTypeService {
   @Transactional
   public void updatePaymentType(Long paymentTypeId, PaymentType paymentTypeDetails)
       throws EntityNotFoundException {
-
-    PaymentType paymentType =
-        paymentTypeRepo
-            .findById(paymentTypeId)
-            .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        String.format(PAYMENT_TYPE_ID_NOT_FOUND.label, paymentTypeId)));
+    PaymentType paymentType = getPaymentTypeById(paymentTypeId);
     if (paymentTypeDetails.getName() != null) {
       paymentType.setName(paymentTypeDetails.getName());
     }
@@ -52,13 +49,6 @@ public class PaymentTypeService {
   }
 
   public void deletePaymentType(Long paymentTypeId) throws EntityNotFoundException {
-    PaymentType paymentType =
-        paymentTypeRepo
-            .findById(paymentTypeId)
-            .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        String.format(PAYMENT_TYPE_ID_NOT_FOUND.label, paymentTypeId)));
-    paymentTypeRepo.delete(paymentType);
+    paymentTypeRepo.delete(getPaymentTypeById(paymentTypeId));
   }
 }
