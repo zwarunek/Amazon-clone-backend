@@ -227,4 +227,13 @@ class AddressServiceTest {
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
   }
+
+  @Test
+  void deleteById() throws EntityNotFoundException {
+    address.setId(1L);
+    address.setAccount(account);
+    given(addressRepo.findById(any())).willReturn(Optional.of(address));
+    addressService.deleteAddress(address.getId());
+    verify(addressRepo).delete(address);
+  }
 }

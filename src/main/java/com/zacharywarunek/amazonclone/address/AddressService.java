@@ -82,18 +82,25 @@ public class AddressService {
                     String.format(ExceptionResponses.NO_FAVORITE_ADDRESS.label, account_id)));
   }
 
+  public Address getAddressById(Long addressId) throws EntityNotFoundException {
+        return addressRepo
+            .findById(addressId)
+            .orElseThrow(
+                () ->
+                    new EntityNotFoundException(
+                        String.format(ADDRESS_NOT_FOUND.label, addressId)));
+  }
+
   public void setFavorite(Long account_id, Long address_id) throws EntityNotFoundException, UnauthorizedException {
-    Address address =
-            addressRepo
-                    .findById(address_id)
-                    .orElseThrow(
-                            () ->
-                                    new EntityNotFoundException(
-                                            String.format(ADDRESS_NOT_FOUND.label, address_id)));
+    Address address = getAddressById(address_id);
     if (!address.getAccount().getId().equals(account_id))
       throw new UnauthorizedException(
               String.format(ADDRESS_UNAUTHORIZED.label, address_id, account_id));
     addressRepo.resetFavorite(getAccountById(account_id));
     addressRepo.setFavorite(address_id);
+  }
+
+  public void deleteAddress(Long addressId) throws EntityNotFoundException {
+    addressRepo.delete(getAddressById(addressId));
   }
 }
