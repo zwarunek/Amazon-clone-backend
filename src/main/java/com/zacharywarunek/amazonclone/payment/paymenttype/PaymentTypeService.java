@@ -29,15 +29,15 @@ public class PaymentTypeService {
                     String.format(PAYMENT_TYPE_ID_NOT_FOUND.label, paymentTypeId)));
   }
 
-  public PaymentType createPaymentTypeById(PaymentType paymentTypeDetails)
+  public void createPaymentType(PaymentType paymentTypeDetails)
       throws BadRequestException {
     if (paymentTypeDetails.getName() == null || paymentTypeDetails.getSrc() == null)
       throw new BadRequestException(ExceptionResponses.NULL_VALUES.label);
-    return paymentTypeRepo.save(paymentTypeDetails);
+    paymentTypeRepo.save(paymentTypeDetails);
   }
 
   @Transactional
-  public void updatePaymentType(Long paymentTypeId, PaymentType paymentTypeDetails)
+  public PaymentType updatePaymentType(Long paymentTypeId, PaymentType paymentTypeDetails)
       throws EntityNotFoundException {
     PaymentType paymentType = getPaymentTypeById(paymentTypeId);
     if (paymentTypeDetails.getName() != null) {
@@ -46,6 +46,7 @@ public class PaymentTypeService {
     if (paymentTypeDetails.getSrc() != null) {
       paymentType.setSrc(paymentTypeDetails.getSrc());
     }
+    return paymentType;
   }
 
   public void deletePaymentType(Long paymentTypeId) throws EntityNotFoundException {
