@@ -2,6 +2,7 @@ package com.zacharywarunek.amazonclone.address;
 
 import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.account.AccountRepo;
+import com.zacharywarunek.amazonclone.account.AccountService;
 import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
 import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
 import com.zacharywarunek.amazonclone.exceptions.ExceptionResponses;
@@ -22,10 +23,10 @@ public class AddressService {
 
   protected final Log logger = LogFactory.getLog(getClass());
   AddressRepo addressRepo;
-  AccountRepo accountRepo;
+  AccountService accountService;
 
   public List<Address> getAllAddresses(Long account_id) throws EntityNotFoundException {
-    return addressRepo.findAddressByAccount(getAccountById(account_id));
+    return addressRepo.findAddressByAccount(accountService.getAccountById(account_id));
   }
 
   public Address createAddress(Long account_id, Address address)
@@ -37,14 +38,14 @@ public class AddressService {
         || address.getFavorite() == null
         || address.getFirst_name() == null
         || address.getLast_name() == null) throw new BadRequestException(NULL_VALUES.label);
-    address.setAccount(getAccountById(account_id));
+    address.setAccount(accountService.getAccountById(account_id));
     return addressRepo.save(address);
   }
 
   @Transactional
   public Address updateAddress(Long account_id, Long address_id, Address addressDetails)
       throws EntityNotFoundException, UnauthorizedException {
-    Account account = getAccountById(account_id);
+    Account account = accountService.getAccountById(account_id);
     Address address =
         addressRepo
             .findById(address_id)
@@ -65,17 +66,9 @@ public class AddressService {
     return address;
   }
 
-  private Account getAccountById(Long account_id) throws EntityNotFoundException {
-    return accountRepo
-        .findById(account_id)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(String.format(ACCOUNT_ID_NOT_FOUND.label, account_id)));
-  }
-
   public Address getFavorite(Long account_id) throws EntityNotFoundException {
     return addressRepo
-        .findFavoriteAddressByAccount(getAccountById(account_id))
+        .findFavoriteAddressByAccount(accountService.getAccountById(account_id))
         .orElseThrow(
             () ->
                 new EntityNotFoundException(
@@ -96,7 +89,7 @@ public class AddressService {
     if (!address.getAccount().getId().equals(account_id))
       throw new UnauthorizedException(
               String.format(ADDRESS_UNAUTHORIZED.label, address_id, account_id));
-    addressRepo.resetFavorite(getAccountById(account_id));
+    addressRepo.resetFavorite(accountService.getAccountById(account_id));
     addressRepo.setFavorite(address_id);
   }
 

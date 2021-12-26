@@ -128,4 +128,12 @@ public class AccountService implements UserDetailsService {
   public void enableAccount(String username) {
     accountRepo.enableAccount(username);
   }
+
+  public Account getAccountById(Long account_id) throws EntityNotFoundException {
+    return accountRepo
+        .findById(account_id)
+        .orElseThrow(
+            () ->
+                new EntityNotFoundException(String.format(ACCOUNT_ID_NOT_FOUND.label, account_id)));
+  }
 }
