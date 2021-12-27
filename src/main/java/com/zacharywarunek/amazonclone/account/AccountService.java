@@ -1,11 +1,24 @@
 package com.zacharywarunek.amazonclone.account;
 
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.ACCOUNT_ID_NOT_FOUND;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.NULL_VALUES;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.USERNAME_NOT_FOUND;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.USERNAME_TAKEN;
+
 import com.zacharywarunek.amazonclone.address.AddressRepo;
 import com.zacharywarunek.amazonclone.config.JwtUtil;
-import com.zacharywarunek.amazonclone.exceptions.*;
+import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
+import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
+import com.zacharywarunek.amazonclone.exceptions.ExceptionResponses;
+import com.zacharywarunek.amazonclone.exceptions.UnauthorizedException;
+import com.zacharywarunek.amazonclone.exceptions.UsernameTakenException;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationToken;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
 import com.zacharywarunek.amazonclone.util.AuthRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,13 +29,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.*;
 
 @Service
 @AllArgsConstructor
@@ -35,11 +41,11 @@ public class AccountService implements UserDetailsService {
   AddressRepo addressRepo;
   JwtUtil jwtUtil;
 
-  public List<Account> getAllAccounts() {
+  public List<Account> getAll() {
     return accountRepo.findAll();
   }
 
-  public String register(Account account) throws BadRequestException, UsernameTakenException {
+  public String create(Account account) throws BadRequestException, UsernameTakenException {
     if (account.getPassword() == null
         || account.getUsername() == null
         || account.getLast_name() == null
@@ -74,7 +80,7 @@ public class AccountService implements UserDetailsService {
   }
 
   @Transactional
-  public Account updateAccount(Long account_id, AccountDetails accountDetails)
+  public Account update(Long account_id, AccountDetails accountDetails)
       throws EntityNotFoundException, UsernameTakenException {
     Account account =
         accountRepo
@@ -100,7 +106,7 @@ public class AccountService implements UserDetailsService {
     return account;
   }
 
-  public void deleteAccount(Long account_id) throws EntityNotFoundException {
+  public void delete(Long account_id) throws EntityNotFoundException {
     Account account =
         accountRepo
             .findById(account_id)
@@ -125,11 +131,11 @@ public class AccountService implements UserDetailsService {
     return new User(account.getUsername(), account.getPassword(), account.getAuthorities());
   }
 
-  public void enableAccount(String username) {
+  public void enable(String username) {
     accountRepo.enableAccount(username);
   }
 
-  public Account getAccountById(Long account_id) throws EntityNotFoundException {
+  public Account findById(Long account_id) throws EntityNotFoundException {
     return accountRepo
         .findById(account_id)
         .orElseThrow(

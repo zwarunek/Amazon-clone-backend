@@ -2,15 +2,20 @@ package com.zacharywarunek.amazonclone.account;
 
 import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
 import com.zacharywarunek.amazonclone.exceptions.UsernameTakenException;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @Validated
@@ -23,14 +28,14 @@ public class AccountController {
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping
   public ResponseEntity<List<Account>> getAllAccounts() {
-    return ResponseEntity.ok(accountService.getAllAccounts());
+    return ResponseEntity.ok(accountService.getAll());
   }
 
   @PutMapping(path = "{account_id}")
   public ResponseEntity<Account> updateAccount(
       @PathVariable("account_id") Long account_id, @RequestBody AccountDetails accountDetails) {
     try {
-      return ResponseEntity.ok(accountService.updateAccount(account_id, accountDetails));
+      return ResponseEntity.ok(accountService.update(account_id, accountDetails));
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (UsernameTakenException e) {
@@ -41,7 +46,7 @@ public class AccountController {
   @DeleteMapping(path = "{account_id}")
   public ResponseEntity<String> deleteAccount(@PathVariable("account_id") Long account_id) {
     try {
-      accountService.deleteAccount(account_id);
+      accountService.delete(account_id);
       return ResponseEntity.ok("Deleted account");
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());

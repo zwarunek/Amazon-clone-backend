@@ -4,13 +4,12 @@ import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.account.AccountRepo;
 import com.zacharywarunek.amazonclone.address.Address;
 import com.zacharywarunek.amazonclone.address.AddressRepo;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @AllArgsConstructor

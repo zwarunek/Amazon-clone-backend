@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RequestMapping(path = "api/v1/accounts/{account_id}/payment-methods")
 public class PaymentMethodController {
-    PaymentMethodService paymentMethodService;
+  PaymentMethodService paymentMethodService;
 }

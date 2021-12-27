@@ -59,7 +59,7 @@ class PaymentMethodRepoTest {
 
   @Test
   void findAddressByAccount() {
-    List<PaymentMethod> paymentMethodList = paymentMethodRepo.findPaymentMethodByByAccount(account);
+    List<PaymentMethod> paymentMethodList = paymentMethodRepo.findByAccount(account);
     assertThat(paymentMethodList).containsAll(Arrays.asList(paymentMethod1, paymentMethod2));
   }
 

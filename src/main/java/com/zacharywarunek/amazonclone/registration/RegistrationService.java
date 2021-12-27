@@ -1,20 +1,26 @@
 package com.zacharywarunek.amazonclone.registration;
 
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.EMAIL_ALREADY_CONFIRMED;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.EXPIRED_TOKEN;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.INVALID_TOKEN;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.USERNAME_NOT_FOUND;
+
 import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.account.AccountRepo;
 import com.zacharywarunek.amazonclone.account.AccountRole;
 import com.zacharywarunek.amazonclone.account.AccountService;
 import com.zacharywarunek.amazonclone.email.EmailService;
-import com.zacharywarunek.amazonclone.exceptions.*;
+import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
+import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
+import com.zacharywarunek.amazonclone.exceptions.ExpiredTokenException;
+import com.zacharywarunek.amazonclone.exceptions.InvalidTokenException;
+import com.zacharywarunek.amazonclone.exceptions.UsernameTakenException;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationToken;
 import com.zacharywarunek.amazonclone.registration.token.ConfirmationTokenService;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-
-import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.*;
 
 @Service
 @AllArgsConstructor
@@ -30,7 +36,7 @@ public class RegistrationService {
 
     String token;
     token =
-        accountService.register(
+        accountService.create(
             new Account(
                 request.getFirstName(),
                 request.getLastName(),
@@ -61,7 +67,7 @@ public class RegistrationService {
     if (confirmationToken.getExpires_at().isBefore(LocalDateTime.now()))
       throw new ExpiredTokenException(EXPIRED_TOKEN.label);
     confirmationTokenService.setConfirmedAt(token);
-    accountService.enableAccount(confirmationToken.getAccount().getUsername());
+    accountService.enable(confirmationToken.getAccount().getUsername());
     return confirmationToken;
   }
 

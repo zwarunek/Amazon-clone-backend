@@ -53,7 +53,7 @@ class AccountServiceTest {
 
   @Test
   void getAllAccounts() {
-    accountService.getAllAccounts();
+    accountService.getAll();
 
     verify(accountRepo).findAll();
   }
@@ -61,7 +61,7 @@ class AccountServiceTest {
   @Test
   void shouldRegister() throws BadRequestException, UsernameTakenException {
     given(passwordEncoder.encode(password)).willReturn(testPasswordEncoder.encode(password));
-    String token = accountService.register(account);
+    String token = accountService.create(account);
     ArgumentCaptor<Account> accountArgumentCaptor = ArgumentCaptor.forClass(Account.class);
     ArgumentCaptor<ConfirmationToken> confirmationTokenArgumentCaptor =
         ArgumentCaptor.forClass(ConfirmationToken.class);
@@ -83,7 +83,7 @@ class AccountServiceTest {
   void registerEmailTaken() {
     given(accountRepo.checkIfUsernameExists(anyString())).willReturn(true);
 
-    assertThatThrownBy(() -> accountService.register(account))
+    assertThatThrownBy(() -> accountService.create(account))
         .isInstanceOf(UsernameTakenException.class)
         .hasMessage(String.format(ExceptionResponses.USERNAME_TAKEN.label, account.getUsername()));
     verify(accountRepo, never()).save(any());
@@ -92,7 +92,7 @@ class AccountServiceTest {
   @Test
   void registerNullValues() {
     account.setPassword(null);
-    assertThatThrownBy(() -> accountService.register(account))
+    assertThatThrownBy(() -> accountService.create(account))
         .isInstanceOf(BadRequestException.class)
         .hasMessage(ExceptionResponses.NULL_VALUES.label);
     verify(accountRepo, never()).save(any());
@@ -143,7 +143,7 @@ class AccountServiceTest {
     given(passwordEncoder.encode(accountDetails.getPassword()))
         .willReturn(testPasswordEncoder.encode(accountDetails.getPassword()));
     given(accountRepo.findById(1L)).willReturn(java.util.Optional.of(account));
-    Account updatedAccount = accountService.updateAccount(1L, accountDetails);
+    Account updatedAccount = accountService.update(1L, accountDetails);
     assertThat(
             testPasswordEncoder.matches(accountDetails.getPassword(), updatedAccount.getPassword()))
         .isTrue();
@@ -153,7 +153,7 @@ class AccountServiceTest {
   @Test
   void updateAccountThrowsNotFound() {
     given(accountRepo.findById(any())).willReturn(java.util.Optional.empty());
-    assertThatThrownBy(() -> accountService.updateAccount(1L, accountDetails))
+    assertThatThrownBy(() -> accountService.update(1L, accountDetails))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ACCOUNT_ID_NOT_FOUND.label, 1L));
   }
@@ -163,7 +163,7 @@ class AccountServiceTest {
     given(accountRepo.findById(1L)).willReturn(java.util.Optional.of(account));
     given(accountRepo.findAccountByUsername(accountDetails.getUsername()))
         .willReturn(java.util.Optional.of(account));
-    assertThatThrownBy(() -> accountService.updateAccount(1L, accountDetails))
+    assertThatThrownBy(() -> accountService.update(1L, accountDetails))
         .isInstanceOf(UsernameTakenException.class)
         .hasMessage(String.format(USERNAME_TAKEN.label, accountDetails.getUsername()));
   }
@@ -173,7 +173,7 @@ class AccountServiceTest {
     account.setId(1L);
     given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.of(account));
 
-    accountService.deleteAccount(account.getId());
+    accountService.delete(account.getId());
 
     ArgumentCaptor<Account> accountCaptor1 = ArgumentCaptor.forClass(Account.class);
     ArgumentCaptor<Account> accountCaptor2 = ArgumentCaptor.forClass(Account.class);
@@ -191,7 +191,7 @@ class AccountServiceTest {
   void deleteAccountNotFound() {
     account.setId(1L);
     given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.empty());
-    assertThatThrownBy(() -> accountService.deleteAccount(account.getId()))
+    assertThatThrownBy(() -> accountService.delete(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ACCOUNT_ID_NOT_FOUND.label, account.getId()));
     verify(confirmationTokenService, never()).deleteAllAtAccount(any());
@@ -221,7 +221,7 @@ class AccountServiceTest {
 
   @Test
   void shouldEnableAccount() {
-    accountService.enableAccount(account.getUsername());
+    accountService.enable(account.getUsername());
     ArgumentCaptor<String> usernameCaptor = ArgumentCaptor.forClass(String.class);
     verify(accountRepo).enableAccount(usernameCaptor.capture());
     assertThat(usernameCaptor.getValue()).isEqualTo(account.getUsername());

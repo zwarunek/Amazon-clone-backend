@@ -11,9 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 public interface PaymentMethodRepo extends IJPABaseRepo<PaymentMethod> {
 
   @Query(value = "SELECT pm FROM PaymentMethod pm WHERE pm.account = :account")
-  List<PaymentMethod> findPaymentMethodByByAccount(Account account);
+  List<PaymentMethod> findByAccount(Account account);
 
-  @Query(value = "SELECT pm FROM PaymentMethod pm WHERE pm.account = :account AND pm.favorite = TRUE")
+  @Query(
+      value = "SELECT pm FROM PaymentMethod pm WHERE pm.account = :account AND pm.favorite = TRUE")
   Optional<PaymentMethod> findFavoritePaymentMethodByAccount(Account account);
 
   @Transactional

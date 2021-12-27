@@ -44,14 +44,14 @@ class AddressRepoTest {
 
   @Test
   void findAddressByAccount() {
-    List<Address> addressList = addressRepo.findAddressByAccount(account);
+    List<Address> addressList = addressRepo.findByAccount(account);
     assertThat(addressList).containsAll(Arrays.asList(address1, address2));
   }
 
   @Test
   void findAddressByAccountEmpty() {
     addressRepo.deleteAll();
-    List<Address> addressList = addressRepo.findAddressByAccount(account);
+    List<Address> addressList = addressRepo.findByAccount(account);
     assertThat(addressList).isEmpty();
   }
 
@@ -60,7 +60,7 @@ class AddressRepoTest {
     addressRepo.save(address1);
     addressRepo.save(address2);
     addressRepo.deleteAllAtAccount(account);
-    assertThat(addressRepo.findAddressByAccount(account)).isEmpty();
+    assertThat(addressRepo.findByAccount(account)).isEmpty();
   }
 
   @Test

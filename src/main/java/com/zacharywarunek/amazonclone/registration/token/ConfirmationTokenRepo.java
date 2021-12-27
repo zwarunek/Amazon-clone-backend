@@ -2,14 +2,12 @@ package com.zacharywarunek.amazonclone.registration.token;
 
 import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.util.JPA.IJPABaseRepo;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)

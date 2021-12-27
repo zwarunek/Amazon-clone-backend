@@ -1,23 +1,5 @@
 package com.zacharywarunek.amazonclone.address;
 
-import com.zacharywarunek.amazonclone.account.Account;
-import com.zacharywarunek.amazonclone.account.AccountRepo;
-import com.zacharywarunek.amazonclone.account.AccountRole;
-import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
-import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
-import com.zacharywarunek.amazonclone.exceptions.ExceptionResponses;
-import com.zacharywarunek.amazonclone.exceptions.UnauthorizedException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,10 +7,27 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.zacharywarunek.amazonclone.account.Account;
+import com.zacharywarunek.amazonclone.account.AccountRole;
+import com.zacharywarunek.amazonclone.account.AccountService;
+import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
+import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
+import com.zacharywarunek.amazonclone.exceptions.ExceptionResponses;
+import com.zacharywarunek.amazonclone.exceptions.UnauthorizedException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 @ExtendWith(MockitoExtension.class)
 class AddressServiceTest {
   @Mock private AddressRepo addressRepo;
-  @Mock private AccountRepo accountRepo;
+  @Mock private AccountService accountService;
   @InjectMocks private AddressService addressService;
   private Account account;
   private Address addressDetails;
@@ -55,94 +54,103 @@ class AddressServiceTest {
 
   @Test
   void getAllAddresses() throws EntityNotFoundException {
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
-    given(addressRepo.findAddressByAccount(account)).willReturn(Collections.singletonList(address));
-    List<Address> actualAddresses = addressService.getAllAddresses(account.getId());
+    given(accountService.findById(1L)).willReturn(account);
+    given(addressRepo.findByAccount(account)).willReturn(Collections.singletonList(address));
+    List<Address> actualAddresses = addressService.getAll(account.getId());
     assertThat(actualAddresses).isEqualTo(Collections.singletonList(address));
   }
 
   @Test
-  void getAllAddressesAccountNotFound() {
-    given(accountRepo.findById(1L)).willReturn(Optional.empty());
-    assertThatThrownBy(() -> addressService.getAllAddresses(account.getId()))
+  void getAllAddressesAccountNotFound() throws EntityNotFoundException {
+    given(accountService.findById(1L))
+        .willThrow(
+            new EntityNotFoundException(
+                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+    assertThatThrownBy(() -> addressService.getAll(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
-    verify(addressRepo, never()).findAddressByAccount(any());
+    verify(addressRepo, never()).findByAccount(any());
   }
 
   @Test
   void createAddressTest() throws BadRequestException, EntityNotFoundException {
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
+    given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.save(any())).willReturn(address);
-    Address actualAddress = addressService.createAddress(account.getId(), address);
+    Address actualAddress = addressService.create(account.getId(), address);
     address.setAccount(account);
     assertThat(actualAddress).isEqualTo(address);
   }
 
   @Test
-  void createAddressNullValues() {
+  void createAddressNullValues() throws EntityNotFoundException {
     address.setAddress(null);
-    assertThatThrownBy(() -> addressService.createAddress(account.getId(), address))
+    assertThatThrownBy(() -> addressService.create(account.getId(), address))
         .isInstanceOf(BadRequestException.class)
         .hasMessage(ExceptionResponses.NULL_VALUES.label);
-    verify(accountRepo, never()).findById(any());
-    verify(addressRepo, never()).findAddressByAccount(any());
+    verify(accountService, never()).findById(any());
+    verify(addressRepo, never()).findByAccount(any());
   }
 
   @Test
-  void createAddressAccountNotFound() {
-    given(accountRepo.findById(1L)).willReturn(Optional.empty());
-    assertThatThrownBy(() -> addressService.createAddress(account.getId(), address))
+  void createAddressAccountNotFound() throws EntityNotFoundException {
+    given(accountService.findById(1L))
+        .willThrow(
+            new EntityNotFoundException(
+                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+    assertThatThrownBy(() -> addressService.create(account.getId(), address))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
-    verify(addressRepo, never()).findAddressByAccount(any());
+    verify(addressRepo, never()).findByAccount(any());
   }
 
   @Test
   void updateAddressTest() throws EntityNotFoundException, UnauthorizedException {
     address.setId(1L);
     address.setAccount(account);
-    given(accountRepo.findById(account.getId())).willReturn(Optional.of(account));
+    given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
     Address actualAddress =
-        addressService.updateAddress(account.getId(), address.getId(), addressDetails);
+        addressService.update(account.getId(), address.getId(), addressDetails);
     assertThat(actualAddress).isEqualTo(address);
   }
 
   @Test
-  void updateAddressAddressNotFound() {
+  void updateAddressAddressNotFound() throws EntityNotFoundException {
     address.setId(1L);
     address.setAccount(account);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
+    given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findById(1L)).willReturn(Optional.empty());
     assertThatThrownBy(
-            () -> addressService.updateAddress(account.getId(), address.getId(), addressDetails))
+            () -> addressService.update(account.getId(), address.getId(), addressDetails))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ExceptionResponses.ADDRESS_NOT_FOUND.label, address.getId()));
   }
 
   @Test
-  void updateAddressAccountNotFound() {
+  void updateAddressAccountNotFound() throws EntityNotFoundException {
     address.setId(1L);
     address.setAccount(account);
-    given(accountRepo.findById(1L)).willReturn(Optional.empty());
+    given(accountService.findById(1L))
+        .willThrow(
+            new EntityNotFoundException(
+                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(
-            () -> addressService.updateAddress(account.getId(), address.getId(), addressDetails))
+            () -> addressService.update(account.getId(), address.getId(), addressDetails))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
     verify(addressRepo, never()).findById(any());
   }
 
   @Test
-  void updateAddressUnauthorized() {
+  void updateAddressUnauthorized() throws EntityNotFoundException {
     address.setId(1L);
     address.setAccount(account);
     Account newAccount = new Account();
     newAccount.setId(2L);
-    given(accountRepo.findById(newAccount.getId())).willReturn(Optional.of(newAccount));
+    given(accountService.findById(2L)).willReturn(newAccount);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
     assertThatThrownBy(
-            () -> addressService.updateAddress(newAccount.getId(), address.getId(), addressDetails))
+            () -> addressService.update(newAccount.getId(), address.getId(), addressDetails))
         .isInstanceOf(UnauthorizedException.class)
         .hasMessage(
             String.format(
@@ -155,27 +163,30 @@ class AddressServiceTest {
   void getFavorite() throws EntityNotFoundException {
     address.setId(1L);
     address.setAccount(account);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
+    given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findFavoriteAddressByAccount(account)).willReturn(Optional.of(address));
     Address actualAddress = addressService.getFavorite(account.getId());
     assertThat(actualAddress).isEqualTo(address);
   }
 
   @Test
-  void getFavoriteAccountNotFound() {
+  void getFavoriteAccountNotFound() throws EntityNotFoundException {
     address.setId(1L);
     address.setAccount(account);
-    given(accountRepo.findById(1L)).willReturn(Optional.empty());
+    given(accountService.findById(1L))
+        .willThrow(
+            new EntityNotFoundException(
+                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> addressService.getFavorite(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
   }
 
   @Test
-  void getFavoriteAddressNotFound() {
+  void getFavoriteAddressNotFound() throws EntityNotFoundException {
     address.setId(1L);
     address.setAccount(account);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
+    given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findFavoriteAddressByAccount(account)).willReturn(Optional.empty());
     assertThatThrownBy(() -> addressService.getFavorite(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
@@ -186,7 +197,7 @@ class AddressServiceTest {
   void setFavorite() throws EntityNotFoundException, UnauthorizedException {
     address.setId(1L);
     address.setAccount(account);
-    given(accountRepo.findById(1L)).willReturn(Optional.of(account));
+    given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
     addressService.setFavorite(account.getId(), address.getId());
   }
@@ -218,11 +229,14 @@ class AddressServiceTest {
   }
 
   @Test
-  void setFavoriteAccountNotFound() {
+  void setFavoriteAccountNotFound() throws EntityNotFoundException {
     address.setId(1L);
     address.setAccount(account);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
-    given(accountRepo.findById(1L)).willReturn(Optional.empty());
+    given(accountService.findById(1L))
+        .willThrow(
+            new EntityNotFoundException(
+                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> addressService.setFavorite(account.getId(), address.getId()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
@@ -233,7 +247,7 @@ class AddressServiceTest {
     address.setId(1L);
     address.setAccount(account);
     given(addressRepo.findById(any())).willReturn(Optional.of(address));
-    addressService.deleteAddress(address.getId());
+    addressService.delete(address.getId());
     verify(addressRepo).delete(address);
   }
 }

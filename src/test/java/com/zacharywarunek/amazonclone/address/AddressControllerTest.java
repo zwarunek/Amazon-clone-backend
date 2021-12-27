@@ -84,7 +84,7 @@ class AddressControllerTest {
       username = "foo@gmail.com",
       roles = {"ADMIN"})
   void getAllAddresses() throws Exception {
-    given(addressService.getAllAddresses(any())).willReturn(Collections.singletonList(address));
+    given(addressService.getAll(any())).willReturn(Collections.singletonList(address));
     mvc.perform(get("/api/v1/accounts/1/addresses").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().string(mapper.writeValueAsString(Collections.singletonList(address))))
@@ -97,7 +97,7 @@ class AddressControllerTest {
       username = "foo@gmail.com",
       roles = {"ADMIN"})
   void getAllAddressesNotFound() throws Exception {
-    when(addressService.getAllAddresses(any()))
+    when(addressService.getAll(any()))
         .thenThrow(new EntityNotFoundException("ACCOUNT NOT FOUND"));
     mvc.perform(get("/api/v1/accounts/1/addresses").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
@@ -112,7 +112,7 @@ class AddressControllerTest {
       roles = {"ADMIN"})
   void createAddresses() throws Exception {
     address.setAccount(null);
-    given(addressService.createAddress(any(), any())).willReturn(address);
+    given(addressService.create(any(), any())).willReturn(address);
     mvc.perform(
             post("/api/v1/accounts/1/addresses")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +129,7 @@ class AddressControllerTest {
       roles = {"ADMIN"})
   void createAddressNotFound() throws Exception {
     address.setAccount(null);
-    when(addressService.createAddress(any(), any()))
+    when(addressService.create(any(), any()))
         .thenThrow(new EntityNotFoundException("ACCOUNT NOT FOUND"));
     mvc.perform(
             post("/api/v1/accounts/1/addresses")
@@ -147,7 +147,7 @@ class AddressControllerTest {
       roles = {"ADMIN"})
   void createAddressesNullValues() throws Exception {
     address.setAccount(null);
-    when(addressService.createAddress(any(), any()))
+    when(addressService.create(any(), any()))
         .thenThrow(new BadRequestException("NULL VALUES"));
     mvc.perform(
             post("/api/v1/accounts/1/addresses")
@@ -164,7 +164,7 @@ class AddressControllerTest {
       username = "foo@gmail.com",
       roles = {"ADMIN"})
   void updateAddresses() throws Exception {
-    given(addressService.updateAddress(any(), any(), any())).willReturn(addressDetails);
+    given(addressService.update(any(), any(), any())).willReturn(addressDetails);
     mvc.perform(
             put("/api/v1/accounts/1/addresses/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -180,7 +180,7 @@ class AddressControllerTest {
       username = "foo@gmail.com",
       roles = {"ADMIN"})
   void updateAddressesNotFound() throws Exception {
-    given(addressService.updateAddress(any(), any(), any()))
+    given(addressService.update(any(), any(), any()))
         .willThrow(new EntityNotFoundException("NOT FOUND"));
     mvc.perform(
             put("/api/v1/accounts/1/addresses/1")
@@ -197,7 +197,7 @@ class AddressControllerTest {
       username = "foo@gmail.com",
       roles = {"ADMIN"})
   void updateAddressesUnauthorized() throws Exception {
-    given(addressService.updateAddress(any(), any(), any()))
+    given(addressService.update(any(), any(), any()))
         .willThrow(new UnauthorizedException("NOT AUTHORIZED"));
     mvc.perform(
             put("/api/v1/accounts/1/addresses/1")

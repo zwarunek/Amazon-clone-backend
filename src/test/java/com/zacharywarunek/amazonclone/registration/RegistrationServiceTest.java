@@ -57,7 +57,7 @@ class RegistrationServiceTest {
         new RegistrationRequest("Zach", "Warunek", "Zach@gmail.com", "password1234");
     String mockToken = "MOCKLINK";
     String mockLink = System.getenv("URL") + "/api/v1/registration/confirm?token=" + mockToken;
-    given(accountService.register(any())).willReturn(mockToken);
+    given(accountService.create(any())).willReturn(mockToken);
     String link = registrationService.register(request);
 
     assertThat(link).isEqualTo(mockLink);

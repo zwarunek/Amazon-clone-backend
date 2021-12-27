@@ -35,20 +35,20 @@ class PaymentTypeServiceTest {
   @Test
   void getAllAddresses() {
     given(paymentTypeRepo.findAll()).willReturn(Collections.singletonList(paymentType));
-    List<PaymentType> paymentTypes = paymentTypeService.getAllPaymentTypes();
+    List<PaymentType> paymentTypes = paymentTypeService.getAll();
     assertThat(paymentTypes).isEqualTo(Collections.singletonList(paymentType));
   }
 
   @Test
   void getByIdFound() throws EntityNotFoundException {
     given(paymentTypeRepo.findById(any())).willReturn(Optional.of(paymentType));
-    assertThat(paymentTypeService.getPaymentTypeById(any())).isEqualTo(paymentType);
+    assertThat(paymentTypeService.findById(any())).isEqualTo(paymentType);
   }
 
   @Test
   void getByIdNotFound() {
     given(paymentTypeRepo.findById(any())).willReturn(Optional.empty());
-    assertThatThrownBy(() -> paymentTypeService.getPaymentTypeById(any()))
+    assertThatThrownBy(() -> paymentTypeService.findById(any()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(
             String.format(ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND.label, paymentType.getId()));
@@ -56,13 +56,13 @@ class PaymentTypeServiceTest {
 
   @Test
   void createPaymentType() throws BadRequestException {
-    paymentTypeService.createPaymentType(paymentType);
+    paymentTypeService.create(paymentType);
     verify(paymentTypeRepo).save(paymentType);
   }
 
   @Test
   void createPaymentTypeNullValues() {
-    assertThatThrownBy(() -> paymentTypeService.createPaymentType(new PaymentType(null, null)))
+    assertThatThrownBy(() -> paymentTypeService.create(new PaymentType(null, null)))
         .isInstanceOf(BadRequestException.class)
         .hasMessage(ExceptionResponses.NULL_VALUES.label);
     verify(paymentTypeRepo, never()).save(any());
@@ -74,7 +74,7 @@ class PaymentTypeServiceTest {
     paymentType.setId(1L);
     given(paymentTypeRepo.findById(paymentType.getId())).willReturn(Optional.of(paymentType));
     PaymentType type =
-        paymentTypeService.updatePaymentType(paymentType.getId(), paymentTypeDetails);
+        paymentTypeService.update(paymentType.getId(), paymentTypeDetails);
     paymentTypeDetails.setId(paymentType.getId());
     assertThat(type).usingRecursiveComparison().isEqualTo(paymentTypeDetails);
   }
@@ -83,7 +83,7 @@ class PaymentTypeServiceTest {
   void updatePaymentTypeNotFound() {
     paymentType.setId(1L);
     given(paymentTypeRepo.findById(paymentType.getId())).willReturn(Optional.empty());
-    assertThatThrownBy(() -> paymentTypeService.updatePaymentType(paymentType.getId(), any()))
+    assertThatThrownBy(() -> paymentTypeService.update(paymentType.getId(), any()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(
             String.format(ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND.label, paymentType.getId()));
@@ -93,7 +93,7 @@ class PaymentTypeServiceTest {
   void deleteById() throws EntityNotFoundException {
     paymentType.setId(1L);
     given(paymentTypeRepo.findById(any())).willReturn(Optional.of(paymentType));
-    paymentTypeService.deletePaymentType(paymentType.getId());
+    paymentTypeService.delete(paymentType.getId());
     verify(paymentTypeRepo).delete(paymentType);
   }
 }
