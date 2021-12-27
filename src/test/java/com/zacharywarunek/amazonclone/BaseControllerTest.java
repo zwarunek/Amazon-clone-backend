@@ -60,9 +60,6 @@ class BaseControllerTest {
     token = jwtUtil.generateToken(account);
   }
 
-  @BeforeEach
-  void setUp() {}
-
   @Test
   @WithMockUser(
       username = "test@gmail.com",

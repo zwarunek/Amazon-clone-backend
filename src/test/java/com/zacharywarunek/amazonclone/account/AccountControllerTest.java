@@ -76,7 +76,7 @@ class AccountControllerTest {
         new Account("Zach2", "Warunek2", "Zach@gmail.com2", "password12342", AccountRole.ROLE_USER);
     account1.setId(1L);
     account2.setId(2L);
-    given(accountService.getAllAccounts()).willReturn(Arrays.asList(account1, account2));
+    given(accountService.getAll()).willReturn(Arrays.asList(account1, account2));
     mvc.perform(get("/api/v1/accounts").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().string(asJsonString(Arrays.asList(account1, account2))))
@@ -105,7 +105,7 @@ class AccountControllerTest {
     when(accountService.loadUserByUsername(any()))
         .thenReturn(
             new User(account.getUsername(), account.getPassword(), account.getAuthorities()));
-    when(accountService.updateAccount(any(), any())).thenReturn(account);
+    when(accountService.update(any(), any())).thenReturn(account);
     mvc.perform(
             put("/api/v1/accounts/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +120,7 @@ class AccountControllerTest {
       username = "Zach@gmail.com",
       roles = {"ADMIN"})
   void updateAccount() throws Exception {
-    when(accountService.updateAccount(any(), any())).thenReturn(account);
+    when(accountService.update(any(), any())).thenReturn(account);
     mvc.perform(
             put("/api/v1/accounts/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -134,7 +134,7 @@ class AccountControllerTest {
       username = "Zach@gmail.com",
       roles = {"ADMIN"})
   void updateAccountUsernameAlreadyExists() throws Exception {
-    when(accountService.updateAccount(any(), any()))
+    when(accountService.update(any(), any()))
         .thenThrow(new UsernameTakenException("USERNAME TAKEN"));
     mvc.perform(
             put("/api/v1/accounts/" + 1)
@@ -149,7 +149,7 @@ class AccountControllerTest {
       username = "Zach@gmail.com",
       roles = {"ADMIN"})
   void updateAccountDoesntExist() throws Exception {
-    when(accountService.updateAccount(any(), any()))
+    when(accountService.update(any(), any()))
         .thenThrow(new EntityNotFoundException("ACCOUNT NOT FOUND"));
     mvc.perform(
             put("/api/v1/accounts/" + 1)
@@ -184,7 +184,7 @@ class AccountControllerTest {
   void deleteAccountNotFound() throws Exception {
     doThrow(new EntityNotFoundException("ACCOUNT NOT FOUND"))
         .when(accountService)
-        .deleteAccount(any());
+        .delete(any());
     mvc.perform(delete("/api/v1/accounts/" + 1).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
         .andExpect(status().reason("ACCOUNT NOT FOUND"));

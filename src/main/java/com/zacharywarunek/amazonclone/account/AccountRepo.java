@@ -1,11 +1,10 @@
 package com.zacharywarunek.amazonclone.account;
 
 import com.zacharywarunek.amazonclone.util.JPA.IJPABaseRepo;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 public interface AccountRepo extends IJPABaseRepo<Account> {
 

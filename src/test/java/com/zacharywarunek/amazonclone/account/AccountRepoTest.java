@@ -1,37 +1,23 @@
 package com.zacharywarunek.amazonclone.account;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class AccountRepoTest {
 
   @Autowired private AccountRepo accountRepo;
+  private Account account;
 
-  @Test
-  void findAccountByEmailShouldBeTrue() {
-    String email = "Zach@gmail.com";
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            email,
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
-    Optional<Account> accountOptional = accountRepo.findAccountByUsername(email);
-    assertThat(accountOptional.isPresent()).isTrue();
-    assertThat(accountOptional.get()).isEqualTo(account);
-  }
-
-  @Test
-  void findAccountByEmailShouldBeFalse() {
-    Account account =
+  @BeforeEach
+  void setup() {
+    account =
         new Account(
             "Zach",
             "Warunek",
@@ -39,6 +25,22 @@ class AccountRepoTest {
             "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
             AccountRole.ROLE_USER);
     accountRepo.save(account);
+  }
+
+  @AfterEach
+  void tearDown() {
+    accountRepo.deleteAll();
+  }
+
+  @Test
+  void findAccountByEmailShouldBeTrue() {
+    Optional<Account> accountOptional = accountRepo.findAccountByUsername(account.getUsername());
+    assertThat(accountOptional.isPresent()).isTrue();
+    assertThat(accountOptional.get()).isEqualTo(account);
+  }
+
+  @Test
+  void findAccountByEmailShouldBeFalse() {
     Optional<Account> accountOptional =
         accountRepo.findAccountByUsername("notInDatabase@gmail.com");
     assertThat(accountOptional.isPresent()).isFalse();
@@ -46,41 +48,16 @@ class AccountRepoTest {
 
   @Test
   void checkIfEmailExistsShouldBeTrue() {
-    String email = "za@gmail.com";
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            email,
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
-    assertThat(accountRepo.checkIfUsernameExists(email)).isTrue();
+    assertThat(accountRepo.checkIfUsernameExists(account.getUsername())).isTrue();
   }
 
   @Test
   void checkIfEmailExistsShouldBeFalse() {
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            "za@gmail.com",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
     assertThat(accountRepo.checkIfUsernameExists("notInDatabase@gmail.com")).isFalse();
   }
 
   @Test
   void enableAccount() {
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            "za@gmail.com",
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
     accountRepo.enableAccount(account.getUsername());
 
     Optional<Account> accountOptional = accountRepo.findById(account.getId());

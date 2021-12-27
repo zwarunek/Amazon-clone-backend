@@ -1,11 +1,10 @@
 package com.zacharywarunek.amazonclone.registration.token;
 
 import com.zacharywarunek.amazonclone.account.Account;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor

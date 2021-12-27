@@ -1,4 +1,4 @@
-package com.zacharywarunek.amazonclone.address;
+package com.zacharywarunek.amazonclone.payment.paymentmethod;
 
 import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.util.JPA.IJPABaseRepo;
@@ -8,26 +8,27 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface AddressRepo extends IJPABaseRepo<Address> {
+public interface PaymentMethodRepo extends IJPABaseRepo<PaymentMethod> {
 
-  @Query(value = "SELECT a FROM Address a WHERE a.account = :account")
-  List<Address> findByAccount(Account account);
+  @Query(value = "SELECT pm FROM PaymentMethod pm WHERE pm.account = :account")
+  List<PaymentMethod> findByAccount(Account account);
 
-  @Query(value = "SELECT a FROM Address a WHERE a.account = :account AND a.favorite = TRUE")
-  Optional<Address> findFavoriteAddressByAccount(Account account);
+  @Query(
+      value = "SELECT pm FROM PaymentMethod pm WHERE pm.account = :account AND pm.favorite = TRUE")
+  Optional<PaymentMethod> findFavoritePaymentMethodByAccount(Account account);
 
   @Transactional
   @Modifying(clearAutomatically = true, flushAutomatically = true)
-  @Query("DELETE FROM Address a WHERE a.account = :account")
+  @Query("DELETE FROM PaymentMethod pm WHERE pm.account = :account")
   int deleteAllAtAccount(Account account);
 
   @Transactional
   @Modifying(clearAutomatically = true, flushAutomatically = true)
-  @Query("UPDATE Address a SET a.favorite = TRUE WHERE a.id = :id")
+  @Query("UPDATE PaymentMethod pm SET pm.favorite = TRUE WHERE pm.id = :id")
   int setFavorite(Long id);
 
   @Transactional
   @Modifying(clearAutomatically = true, flushAutomatically = true)
-  @Query("UPDATE Address a SET a.favorite = FALSE WHERE a.account = :account")
+  @Query("UPDATE PaymentMethod pm SET pm.favorite = FALSE WHERE pm.account = :account")
   int resetFavorite(Account account);
 }

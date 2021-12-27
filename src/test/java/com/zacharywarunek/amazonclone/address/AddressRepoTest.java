@@ -1,107 +1,72 @@
 package com.zacharywarunek.amazonclone.address;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.zacharywarunek.amazonclone.account.Account;
 import com.zacharywarunek.amazonclone.account.AccountRepo;
 import com.zacharywarunek.amazonclone.account.AccountRole;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 @DataJpaTest
 class AddressRepoTest {
 
   @Autowired AddressRepo addressRepo;
   @Autowired AccountRepo accountRepo;
+  private Account account;
+  private Address address1;
+  private Address address2;
+
+  @BeforeEach
+  void setup() {
+    account =
+        new Account("Zach", "Warunek", "Zach@gmail.com", "password1234", AccountRole.ROLE_USER);
+    accountRepo.save(account);
+    address1 =
+        new Address(account, "testAddress1", "testCity1", "CA", 54321, false, "Zach1", "Warunek1");
+    address2 =
+        new Address(account, "testAddress2", "testCity2", "MI", 12345, false, "Zach2", "Warunek2");
+    addressRepo.save(address1);
+    addressRepo.save(address2);
+  }
+
+  @AfterEach
+  void tearDown() {
+    accountRepo.deleteAll();
+    addressRepo.deleteAll();
+  }
 
   @Test
   void findAddressByAccount() {
-    String email = "Zach@gmail.com";
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            email,
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
-    Address address1 =
-        new Address(account, "testAddress1", "testCity1", "MI", 12345, false, "Zach", "Warunek");
-    Address address2 =
-        new Address(account, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
-    addressRepo.save(address1);
-    addressRepo.save(address2);
-    List<Address> addressList = addressRepo.findAddressByAccount(account);
+    List<Address> addressList = addressRepo.findByAccount(account);
     assertThat(addressList).containsAll(Arrays.asList(address1, address2));
   }
 
   @Test
   void findAddressByAccountEmpty() {
-    String email = "Zach@gmail.com";
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            email,
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
-    List<Address> addressList = addressRepo.findAddressByAccount(account);
+    addressRepo.deleteAll();
+    List<Address> addressList = addressRepo.findByAccount(account);
     assertThat(addressList).isEmpty();
   }
 
   @Test
   void deleteAllByAccount() {
-    String email = "Zach@gmail.com";
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            email,
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
-    Address address1 =
-        new Address(account, "testAddress1", "testCity1", "MI", 12345, false, "Zach", "Warunek");
-    Address address2 =
-        new Address(account, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-    Address address3 =
-        new Address(account, "testAddress3", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
     addressRepo.save(address1);
     addressRepo.save(address2);
-    addressRepo.save(address3);
     addressRepo.deleteAllAtAccount(account);
-    assertThat(addressRepo.findAddressByAccount(account)).isEmpty();
+    assertThat(addressRepo.findByAccount(account)).isEmpty();
   }
 
   @Test
   void setAsFavorite() {
-    String email = "Zach@gmail.com";
-    Account account =
-        new Account(
-            "Zach",
-            "Warunek",
-            email,
-            "$2a$15$2oqrWMbqoddS.uypTtSXu.xOUlqypXwuocXM4Jb3t1NE4vH.CkuxW",
-            AccountRole.ROLE_USER);
-    accountRepo.save(account);
-    Address address1 =
-        new Address(account, "testAddress1", "testCity1", "MI", 12345, true, "Zach", "Warunek");
-    Address address2 =
-        new Address(account, "testAddress2", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-    Address address3 =
-        new Address(account, "testAddress3", "testCity2", "MI", 12345, false, "Zach", "Warunek");
-
+    address1.setFavorite(true);
     addressRepo.save(address1);
-    addressRepo.save(address2);
-    addressRepo.save(address3);
     addressRepo.resetFavorite(account);
     addressRepo.setFavorite(address2.getId());
     Optional<Address> addressOptional1 = addressRepo.findById(address1.getId());
