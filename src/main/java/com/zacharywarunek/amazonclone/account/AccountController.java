@@ -27,12 +27,12 @@ public class AccountController {
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping
-  public ResponseEntity<List<Account>> getAllAccounts() {
+  public ResponseEntity<List<Account>> getAll() {
     return ResponseEntity.ok(accountService.getAll());
   }
 
   @PutMapping(path = "{account_id}")
-  public ResponseEntity<Account> updateAccount(
+  public ResponseEntity<Account> update(
       @PathVariable("account_id") Long account_id, @RequestBody AccountDetails accountDetails) {
     try {
       return ResponseEntity.ok(accountService.update(account_id, accountDetails));
@@ -44,7 +44,7 @@ public class AccountController {
   }
 
   @DeleteMapping(path = "{account_id}")
-  public ResponseEntity<String> deleteAccount(@PathVariable("account_id") Long account_id) {
+  public ResponseEntity<String> delete(@PathVariable("account_id") Long account_id) {
     try {
       accountService.delete(account_id);
       return ResponseEntity.ok("Deleted account");
