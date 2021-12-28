@@ -35,7 +35,6 @@ public class PaymentTypeController {
     }
   }
 
-  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping
   public List<PaymentType> getAll() {
     return paymentTypeService.getAll();
@@ -58,7 +57,7 @@ public class PaymentTypeController {
   public ResponseEntity<String> delete(@PathVariable("payment_type_id") Long paymentMethodId) {
     try {
       paymentTypeService.delete(paymentMethodId);
-      return ResponseEntity.ok("Deleted address");
+      return ResponseEntity.ok("Deleted payment type");
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }

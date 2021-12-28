@@ -68,7 +68,7 @@ public class PaymentMethodController {
       @PathVariable("account_id") Long accountId) {
     try {
       paymentMethodService.delete(paymentMethodId, accountId);
-      return ResponseEntity.ok("Deleted address");
+      return ResponseEntity.ok("Deleted payment method");
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     } catch (UnauthorizedException e) {

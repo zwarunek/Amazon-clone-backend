@@ -90,13 +90,7 @@ public class AccountService implements UserDetailsService {
   @Transactional
   public Account update(Long account_id, AccountDetails accountDetails)
       throws EntityNotFoundException, UsernameTakenException {
-    Account account =
-        accountRepo
-            .findById(account_id)
-            .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        String.format(ACCOUNT_ID_NOT_FOUND.label, account_id)));
+    Account account = findById(account_id);
     if (accountDetails.getUsername() != null
         && !accountDetails.getUsername().equals(account.getUsername()))
       if (accountRepo.findAccountByUsername(accountDetails.getUsername()).isPresent())
@@ -115,13 +109,7 @@ public class AccountService implements UserDetailsService {
   }
 
   public void delete(Long account_id) throws EntityNotFoundException {
-    Account account =
-        accountRepo
-            .findById(account_id)
-            .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        String.format(ACCOUNT_ID_NOT_FOUND.label, account_id)));
+    Account account = findById(account_id);
     confirmationTokenService.deleteAllAtAccount(account);
     addressRepo.deleteAllAtAccount(account);
     accountRepo.deleteById(account.getId());
