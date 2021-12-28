@@ -155,7 +155,7 @@ class AccountServiceTest {
     given(accountRepo.findById(any())).willReturn(java.util.Optional.empty());
     assertThatThrownBy(() -> accountService.update(1L, accountDetails))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ACCOUNT_ID_NOT_FOUND.label, 1L));
+        .hasMessage(String.format(ACCOUNT_NOT_FOUND.label, 1L));
   }
 
   @Test
@@ -193,7 +193,7 @@ class AccountServiceTest {
     given(accountRepo.findById(account.getId())).willReturn(java.util.Optional.empty());
     assertThatThrownBy(() -> accountService.delete(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ACCOUNT_NOT_FOUND.label, account.getId()));
     verify(confirmationTokenService, never()).deleteAllAtAccount(any());
     verify(addressRepo, never()).deleteAllAtAccount(any());
     verify(accountRepo, never()).deleteById(any());

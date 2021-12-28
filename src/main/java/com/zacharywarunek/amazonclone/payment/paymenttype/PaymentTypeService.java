@@ -1,6 +1,6 @@
 package com.zacharywarunek.amazonclone.payment.paymenttype;
 
-import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.PAYMENT_TYPE_NOT_FOUND;
 
 import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
 import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
@@ -25,7 +25,7 @@ public class PaymentTypeService {
         .orElseThrow(
             () ->
                 new EntityNotFoundException(
-                    String.format(PAYMENT_TYPE_ID_NOT_FOUND.label, paymentTypeId)));
+                    String.format(PAYMENT_TYPE_NOT_FOUND.label, paymentTypeId)));
   }
 
   public PaymentType create(PaymentType paymentTypeDetails) throws BadRequestException {

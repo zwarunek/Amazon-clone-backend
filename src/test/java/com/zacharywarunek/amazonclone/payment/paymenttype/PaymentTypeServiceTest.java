@@ -51,7 +51,7 @@ class PaymentTypeServiceTest {
     assertThatThrownBy(() -> paymentTypeService.findById(any()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(
-            String.format(ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND.label, paymentType.getId()));
+            String.format(ExceptionResponses.PAYMENT_TYPE_NOT_FOUND.label, paymentType.getId()));
   }
 
   @Test
@@ -86,7 +86,7 @@ class PaymentTypeServiceTest {
     assertThatThrownBy(() -> paymentTypeService.update(paymentType.getId(), any()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(
-            String.format(ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND.label, paymentType.getId()));
+            String.format(ExceptionResponses.PAYMENT_TYPE_NOT_FOUND.label, paymentType.getId()));
   }
 
   @Test

@@ -74,10 +74,10 @@ class PaymentMethodServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> paymentMethodService.getAll(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
     verify(paymentMethodRepo, never()).findByAccount(any());
   }
 
@@ -109,11 +109,11 @@ class PaymentMethodServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(
             () -> paymentMethodService.create(account.getId(), paymentMethodDetails))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
     verify(paymentMethodRepo, never()).findByAccount(any());
   }
 
@@ -134,13 +134,13 @@ class PaymentMethodServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(
             () ->
                 paymentMethodService.update(
                     account.getId(), paymentMethod.getId(), paymentMethodDetails))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
   }
 
   @Test
@@ -154,7 +154,7 @@ class PaymentMethodServiceTest {
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(
             String.format(
-                ExceptionResponses.PAYMENT_METHOD_ID_NOT_FOUND.label, paymentMethod.getId()));
+                ExceptionResponses.PAYMENT_METHOD_NOT_FOUND.label, paymentMethod.getId()));
   }
 
   @Test
@@ -165,14 +165,14 @@ class PaymentMethodServiceTest {
         .willThrow(
             new EntityNotFoundException(
                 String.format(
-                    ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND.label, paymentType.getId())));
+                    ExceptionResponses.PAYMENT_TYPE_NOT_FOUND.label, paymentType.getId())));
     assertThatThrownBy(
             () ->
                 paymentMethodService.update(
                     account.getId(), paymentMethod.getId(), paymentMethodDetails))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(
-            String.format(ExceptionResponses.PAYMENT_TYPE_ID_NOT_FOUND.label, paymentType.getId()));
+            String.format(ExceptionResponses.PAYMENT_TYPE_NOT_FOUND.label, paymentType.getId()));
   }
 
   @Test
@@ -225,10 +225,10 @@ class PaymentMethodServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> paymentMethodService.getFavorite(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
   }
 
   @Test
@@ -260,7 +260,7 @@ class PaymentMethodServiceTest {
             () -> paymentMethodService.setFavorite(account.getId(), paymentMethod.getId()))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage(
-            String.format(ExceptionResponses.PAYMENT_METHOD_ID_NOT_FOUND.label, account.getId()));
+            String.format(ExceptionResponses.PAYMENT_METHOD_NOT_FOUND.label, account.getId()));
   }
 
   @Test
@@ -285,10 +285,10 @@ class PaymentMethodServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> paymentMethodService.setFavorite(account.getId(), address.getId()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
   }
 
   @Test

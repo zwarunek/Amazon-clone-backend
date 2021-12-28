@@ -1,6 +1,6 @@
 package com.zacharywarunek.amazonclone.account;
 
-import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.ACCOUNT_ID_NOT_FOUND;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.ACCOUNT_NOT_FOUND;
 import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.NULL_VALUES;
 import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.USERNAME_NOT_FOUND;
 import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.USERNAME_TAKEN;
@@ -46,7 +46,7 @@ public class AccountService implements UserDetailsService {
         .findById(account_id)
         .orElseThrow(
             () ->
-                new EntityNotFoundException(String.format(ACCOUNT_ID_NOT_FOUND.label, account_id)));
+                new EntityNotFoundException(String.format(ACCOUNT_NOT_FOUND.label, account_id)));
   }
 
   public List<Account> getAll() {

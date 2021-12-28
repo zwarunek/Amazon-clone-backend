@@ -66,10 +66,10 @@ class AddressServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> addressService.getAll(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
     verify(addressRepo, never()).findByAccount(any());
   }
 
@@ -97,10 +97,10 @@ class AddressServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> addressService.create(account.getId(), address))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
     verify(addressRepo, never()).findByAccount(any());
   }
 
@@ -127,11 +127,11 @@ class AddressServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(
             () -> addressService.update(account.getId(), address.getId(), addressDetails))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
     verify(addressRepo, never()).findById(any());
   }
 
@@ -164,10 +164,10 @@ class AddressServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> addressService.getFavorite(account.getId()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
   }
 
   @Test
@@ -212,10 +212,10 @@ class AddressServiceTest {
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
-                String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId())));
+                String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId())));
     assertThatThrownBy(() -> addressService.setFavorite(account.getId(), address.getId()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(String.format(ExceptionResponses.ACCOUNT_ID_NOT_FOUND.label, account.getId()));
+        .hasMessage(String.format(ExceptionResponses.ACCOUNT_NOT_FOUND.label, account.getId()));
   }
 
   @Test

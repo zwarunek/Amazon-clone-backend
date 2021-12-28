@@ -1,7 +1,7 @@
 package com.zacharywarunek.amazonclone.payment.paymentmethod;
 
 import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.NULL_VALUES;
-import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.PAYMENT_METHOD_ID_NOT_FOUND;
+import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.PAYMENT_METHOD_NOT_FOUND;
 import static com.zacharywarunek.amazonclone.exceptions.ExceptionResponses.PAYMENT_METHOD_UNAUTHORIZED;
 
 import com.zacharywarunek.amazonclone.account.Account;
@@ -31,7 +31,7 @@ public class PaymentMethodService {
         .orElseThrow(
             () ->
                 new EntityNotFoundException(
-                    String.format(PAYMENT_METHOD_ID_NOT_FOUND.label, paymentMethodId)));
+                    String.format(PAYMENT_METHOD_NOT_FOUND.label, paymentMethodId)));
   }
 
   public List<PaymentMethod> getAll(Long accountId) throws EntityNotFoundException {
