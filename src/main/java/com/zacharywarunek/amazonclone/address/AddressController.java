@@ -26,7 +26,7 @@ public class AddressController {
   private final AddressService addressService;
 
   @PostMapping
-  public ResponseEntity<Object> createAddress(
+  public ResponseEntity<Address> create(
       @PathVariable("account_id") Long account_id, @RequestBody Address address) {
     try {
       return ResponseEntity.ok(addressService.create(account_id, address));
@@ -38,16 +38,16 @@ public class AddressController {
   }
 
   @GetMapping
-  public List<Address> getAllAddresses(@PathVariable("account_id") Long account_id) {
+  public ResponseEntity<List<Address>> getAll(@PathVariable("account_id") Long account_id) {
     try {
-      return addressService.getAll(account_id);
+      return ResponseEntity.ok(addressService.getAll(account_id));
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
   }
 
   @PutMapping(path = "{address_id}")
-  public ResponseEntity<Object> updateAddress(
+  public ResponseEntity<Address> updateAddress(
       @PathVariable("account_id") Long account_id,
       @PathVariable("address_id") Long address_id,
       @RequestBody Address addressDetails) {
