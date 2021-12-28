@@ -282,4 +282,35 @@ class AddressControllerTest {
         .andReturn()
         .getResponse();
   }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void deleteAddress() throws Exception {
+    address.setId(1L);
+    mvc.perform(
+            put("/api/v1/accounts/1/addresses/1/favorite"))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string("Address with id " + address.getId() + " is now the favorite address"))
+        .andReturn()
+        .getResponse();
+  }
+
+  @Test
+  @WithMockUser(
+      username = "foo@gmail.com",
+      roles = {"ADMIN"})
+  void deleteAddressNotFound() throws Exception {
+    doThrow(new EntityNotFoundException("NOT FOUND"))
+        .when(addressService)
+        .setFavorite(any(), any());
+    mvc.perform(
+            put("/api/v1/accounts/1/addresses/1/favorite"))
+        .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
+        .andExpect(status().reason("NOT FOUND"))
+        .andReturn()
+        .getResponse();
+  }
 }

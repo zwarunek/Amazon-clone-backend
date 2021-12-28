@@ -292,9 +292,21 @@ class PaymentMethodServiceTest {
   }
 
   @Test
-  void deleteById() throws EntityNotFoundException {
+  void deleteById() throws EntityNotFoundException, UnauthorizedException {
     given(paymentMethodRepo.findById(any())).willReturn(Optional.of(paymentMethod));
-    paymentMethodService.delete(paymentMethod.getId());
+    paymentMethodService.delete(account.getId(), paymentMethod.getId());
     verify(paymentMethodRepo).delete(paymentMethod);
+  }
+
+  @Test
+  void deleteByIdUnauthorized() {
+    given(paymentMethodRepo.findById(any())).willReturn(Optional.of(paymentMethod));
+    assertThatThrownBy(() -> paymentMethodService.delete(2L, paymentMethod.getId()))
+        .isInstanceOf(UnauthorizedException.class)
+        .hasMessage(
+            String.format(
+                ExceptionResponses.PAYMENT_METHOD_UNAUTHORIZED.label,
+                paymentMethod.getId(),
+                2L));
   }
 }

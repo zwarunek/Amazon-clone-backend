@@ -50,6 +50,7 @@ class AddressServiceTest {
             "changedLast");
     address =
         new Address(account, "testAddress1", "testCity1", "MI", 12345, false, "Zach", "Warunek");
+    address.setId(1L);
   }
 
   @Test
@@ -105,19 +106,14 @@ class AddressServiceTest {
 
   @Test
   void updateAddressTest() throws EntityNotFoundException, UnauthorizedException {
-    address.setId(1L);
-    address.setAccount(account);
     given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
-    Address actualAddress =
-        addressService.update(account.getId(), address.getId(), addressDetails);
+    Address actualAddress = addressService.update(account.getId(), address.getId(), addressDetails);
     assertThat(actualAddress).isEqualTo(address);
   }
 
   @Test
   void updateAddressAddressNotFound() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
     given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findById(1L)).willReturn(Optional.empty());
     assertThatThrownBy(
@@ -128,8 +124,6 @@ class AddressServiceTest {
 
   @Test
   void updateAddressAccountNotFound() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
@@ -143,8 +137,6 @@ class AddressServiceTest {
 
   @Test
   void updateAddressUnauthorized() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
     Account newAccount = new Account();
     newAccount.setId(2L);
     given(accountService.findById(2L)).willReturn(newAccount);
@@ -161,8 +153,6 @@ class AddressServiceTest {
 
   @Test
   void getFavorite() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
     given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findFavoriteAddressByAccount(account)).willReturn(Optional.of(address));
     Address actualAddress = addressService.getFavorite(account.getId());
@@ -171,8 +161,6 @@ class AddressServiceTest {
 
   @Test
   void getFavoriteAccountNotFound() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
     given(accountService.findById(1L))
         .willThrow(
             new EntityNotFoundException(
@@ -184,8 +172,6 @@ class AddressServiceTest {
 
   @Test
   void getFavoriteAddressNotFound() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
     given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findFavoriteAddressByAccount(account)).willReturn(Optional.empty());
     assertThatThrownBy(() -> addressService.getFavorite(account.getId()))
@@ -195,8 +181,6 @@ class AddressServiceTest {
 
   @Test
   void setFavorite() throws EntityNotFoundException, UnauthorizedException {
-    address.setId(1L);
-    address.setAccount(account);
     given(accountService.findById(1L)).willReturn(account);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
     addressService.setFavorite(account.getId(), address.getId());
@@ -204,8 +188,6 @@ class AddressServiceTest {
 
   @Test
   void setFavoriteAddressNotFound() {
-    address.setId(1L);
-    address.setAccount(account);
     given(addressRepo.findById(address.getId())).willReturn(Optional.empty());
     assertThatThrownBy(() -> addressService.setFavorite(account.getId(), address.getId()))
         .isInstanceOf(EntityNotFoundException.class)
@@ -214,24 +196,18 @@ class AddressServiceTest {
 
   @Test
   void setFavoriteUnauthorized() {
-    address.setId(1L);
-    address.setAccount(account);
-    Account newAccount = new Account();
-    newAccount.setId(2L);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
-    assertThatThrownBy(() -> addressService.setFavorite(newAccount.getId(), address.getId()))
+    assertThatThrownBy(() -> addressService.setFavorite(2L, address.getId()))
         .isInstanceOf(UnauthorizedException.class)
         .hasMessage(
             String.format(
                 ExceptionResponses.ADDRESS_UNAUTHORIZED.label,
                 address.getId(),
-                newAccount.getId()));
+                2L));
   }
 
   @Test
   void setFavoriteAccountNotFound() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
     given(addressRepo.findById(address.getId())).willReturn(Optional.of(address));
     given(accountService.findById(1L))
         .willThrow(
@@ -243,11 +219,21 @@ class AddressServiceTest {
   }
 
   @Test
-  void deleteById() throws EntityNotFoundException {
-    address.setId(1L);
-    address.setAccount(account);
+  void deleteById() throws EntityNotFoundException, UnauthorizedException {
     given(addressRepo.findById(any())).willReturn(Optional.of(address));
-    addressService.delete(address.getId());
+    addressService.delete(account.getId(), address.getId());
     verify(addressRepo).delete(address);
+  }
+
+  @Test
+  void deleteByIdUnauthorized() {
+    given(addressRepo.findById(any())).willReturn(Optional.of(address));
+    assertThatThrownBy(() -> addressService.delete(2L, address.getId()))
+        .isInstanceOf(UnauthorizedException.class)
+        .hasMessage(
+            String.format(
+                ExceptionResponses.ADDRESS_UNAUTHORIZED.label,
+                address.getId(),
+                2L));
   }
 }

@@ -28,10 +28,10 @@ public class PaymentTypeService {
                     String.format(PAYMENT_TYPE_ID_NOT_FOUND.label, paymentTypeId)));
   }
 
-  public void create(PaymentType paymentTypeDetails) throws BadRequestException {
+  public PaymentType create(PaymentType paymentTypeDetails) throws BadRequestException {
     if (paymentTypeDetails.getName() == null || paymentTypeDetails.getSrc() == null)
       throw new BadRequestException(ExceptionResponses.NULL_VALUES.label);
-    paymentTypeRepo.save(paymentTypeDetails);
+    return paymentTypeRepo.save(paymentTypeDetails);
   }
 
   @Transactional

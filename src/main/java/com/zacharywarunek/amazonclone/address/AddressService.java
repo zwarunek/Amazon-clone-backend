@@ -25,11 +25,18 @@ public class AddressService {
   AddressRepo addressRepo;
   AccountService accountService;
 
-  public List<Address> getAll(Long account_id) throws EntityNotFoundException {
-    return addressRepo.findByAccount(accountService.findById(account_id));
+  public Address findById(Long addressId) throws EntityNotFoundException {
+    return addressRepo
+        .findById(addressId)
+        .orElseThrow(
+            () -> new EntityNotFoundException(String.format(ADDRESS_NOT_FOUND.label, addressId)));
   }
 
-  public Address create(Long account_id, Address address)
+  public List<Address> getAll(Long accountId) throws EntityNotFoundException {
+    return addressRepo.findByAccount(accountService.findById(accountId));
+  }
+
+  public Address create(Long accountId, Address address)
       throws BadRequestException, EntityNotFoundException {
     if (address.getAddress() == null
         || address.getCity() == null
@@ -38,18 +45,18 @@ public class AddressService {
         || address.getFavorite() == null
         || address.getFirst_name() == null
         || address.getLast_name() == null) throw new BadRequestException(NULL_VALUES.label);
-    address.setAccount(accountService.findById(account_id));
+    address.setAccount(accountService.findById(accountId));
     return addressRepo.save(address);
   }
 
   @Transactional
-  public Address update(Long account_id, Long address_id, Address addressDetails)
+  public Address update(Long accountId, Long addressId, Address addressDetails)
       throws EntityNotFoundException, UnauthorizedException {
-    Account account = accountService.findById(account_id);
-    Address address = findById(address_id);
+    Account account = accountService.findById(accountId);
+    Address address = findById(addressId);
     if (!address.getAccount().getId().equals(account.getId()))
       throw new UnauthorizedException(
-          String.format(ADDRESS_UNAUTHORIZED.label, address_id, account_id));
+          String.format(ADDRESS_UNAUTHORIZED.label, addressId, accountId));
     if (addressDetails.getAddress() != null) address.setAddress(addressDetails.getAddress());
     if (addressDetails.getCity() != null) address.setCity(addressDetails.getCity());
     if (addressDetails.getState() != null) address.setState(addressDetails.getState());
@@ -60,33 +67,31 @@ public class AddressService {
     return address;
   }
 
-  public Address getFavorite(Long account_id) throws EntityNotFoundException {
+  public void delete(Long accountId, Long addressId)
+      throws EntityNotFoundException, UnauthorizedException {
+    Address address = findById(addressId);
+    if (!address.getAccount().getId().equals(accountId))
+      throw new UnauthorizedException(
+          String.format(ADDRESS_UNAUTHORIZED.label, addressId, accountId));
+    addressRepo.delete(address);
+  }
+
+  public Address getFavorite(Long accountId) throws EntityNotFoundException {
     return addressRepo
-        .findFavoriteAddressByAccount(accountService.findById(account_id))
+        .findFavoriteAddressByAccount(accountService.findById(accountId))
         .orElseThrow(
             () ->
                 new EntityNotFoundException(
-                    String.format(ExceptionResponses.NO_FAVORITE_ADDRESS.label, account_id)));
+                    String.format(ExceptionResponses.NO_FAVORITE_ADDRESS.label, accountId)));
   }
 
-  public Address findById(Long addressId) throws EntityNotFoundException {
-    return addressRepo
-        .findById(addressId)
-        .orElseThrow(
-            () -> new EntityNotFoundException(String.format(ADDRESS_NOT_FOUND.label, addressId)));
-  }
-
-  public void setFavorite(Long account_id, Long address_id)
+  public void setFavorite(Long accountId, Long addressId)
       throws EntityNotFoundException, UnauthorizedException {
-    Address address = findById(address_id);
-    if (!address.getAccount().getId().equals(account_id))
+    Address address = findById(addressId);
+    if (!address.getAccount().getId().equals(accountId))
       throw new UnauthorizedException(
-          String.format(ADDRESS_UNAUTHORIZED.label, address_id, account_id));
-    addressRepo.resetFavorite(accountService.findById(account_id));
-    addressRepo.setFavorite(address_id);
-  }
-
-  public void delete(Long addressId) throws EntityNotFoundException {
-    addressRepo.delete(findById(addressId));
+          String.format(ADDRESS_UNAUTHORIZED.label, addressId, accountId));
+    addressRepo.resetFavorite(accountService.findById(accountId));
+    addressRepo.setFavorite(addressId);
   }
 }

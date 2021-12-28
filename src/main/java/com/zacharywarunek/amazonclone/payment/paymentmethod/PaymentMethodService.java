@@ -25,10 +25,6 @@ public class PaymentMethodService {
   PaymentTypeService paymentTypeService;
   AddressService addressService;
 
-  public List<PaymentMethod> getAll(Long accountId) throws EntityNotFoundException {
-    return paymentMethodRepo.findByAccount(accountService.findById(accountId));
-  }
-
   public PaymentMethod findById(Long paymentMethodId) throws EntityNotFoundException {
     return paymentMethodRepo
         .findById(paymentMethodId)
@@ -36,6 +32,10 @@ public class PaymentMethodService {
             () ->
                 new EntityNotFoundException(
                     String.format(PAYMENT_METHOD_ID_NOT_FOUND.label, paymentMethodId)));
+  }
+
+  public List<PaymentMethod> getAll(Long accountId) throws EntityNotFoundException {
+    return paymentMethodRepo.findByAccount(accountService.findById(accountId));
   }
 
   public PaymentMethod create(Long accountId, PaymentMethodDetails paymentMethodDetails)
@@ -87,27 +87,32 @@ public class PaymentMethodService {
     return paymentMethod;
   }
 
-  public PaymentMethod getFavorite(Long account_id) throws EntityNotFoundException {
+  public void delete(Long accountId,Long paymentMethodId)
+      throws EntityNotFoundException, UnauthorizedException {
+    PaymentMethod paymentMethod = findById(paymentMethodId);
+    if (!paymentMethod.getAccount().getId().equals(accountId))
+      throw new UnauthorizedException(
+          String.format(PAYMENT_METHOD_UNAUTHORIZED.label, paymentMethodId, accountId));
+    paymentMethodRepo.delete(paymentMethod);
+  }
+
+  public PaymentMethod getFavorite(Long accountId) throws EntityNotFoundException {
     return paymentMethodRepo
-        .findFavoritePaymentMethodByAccount(accountService.findById(account_id))
+        .findFavoritePaymentMethodByAccount(accountService.findById(accountId))
         .orElseThrow(
             () ->
                 new EntityNotFoundException(
                     String.format(
-                        ExceptionResponses.NO_FAVORITE_PAYMENT_METHOD.label, account_id)));
+                        ExceptionResponses.NO_FAVORITE_PAYMENT_METHOD.label, accountId)));
   }
 
-  public void setFavorite(Long account_id, Long paymentMethodId)
+  public void setFavorite(Long accountId, Long paymentMethodId)
       throws EntityNotFoundException, UnauthorizedException {
     PaymentMethod paymentMethod = findById(paymentMethodId);
-    if (!paymentMethod.getAccount().getId().equals(account_id))
+    if (!paymentMethod.getAccount().getId().equals(accountId))
       throw new UnauthorizedException(
-          String.format(PAYMENT_METHOD_UNAUTHORIZED.label, paymentMethodId, account_id));
-    paymentMethodRepo.resetFavorite(accountService.findById(account_id));
+          String.format(PAYMENT_METHOD_UNAUTHORIZED.label, paymentMethodId, accountId));
+    paymentMethodRepo.resetFavorite(accountService.findById(accountId));
     paymentMethodRepo.setFavorite(paymentMethodId);
-  }
-
-  public void delete(Long paymentMethodId) throws EntityNotFoundException {
-    paymentMethodRepo.delete(findById(paymentMethodId));
   }
 }

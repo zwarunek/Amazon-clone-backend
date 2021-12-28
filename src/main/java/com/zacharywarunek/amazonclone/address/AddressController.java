@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,5 +82,18 @@ public class AddressController {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
     return ResponseEntity.ok("Address with id " + address_id + " is now the favorite address");
+  }
+
+  @DeleteMapping(path = "{address_id}")
+  public ResponseEntity<String> deleteAddress(
+      @PathVariable("address_id") Long addressId, @PathVariable("account_id") Long accountId) {
+    try {
+      addressService.delete(addressId, accountId);
+      return ResponseEntity.ok("Deleted address");
+    } catch (EntityNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    } catch (UnauthorizedException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
   }
 }
