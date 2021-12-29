@@ -1,0 +1,67 @@
+package com.zacharywarunek.amazonclone.seller;
+
+import com.zacharywarunek.amazonclone.category.Category;
+import com.zacharywarunek.amazonclone.category.CategoryService;
+import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
+import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+@RestController
+@Validated
+@AllArgsConstructor
+@RequestMapping(path = "api/v1/sellers")
+public class SellerController {
+  SellerService sellerService;
+
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PostMapping
+  public ResponseEntity<Seller> create(@RequestBody Seller seller) {
+    try {
+      return ResponseEntity.ok(sellerService.create(seller));
+    } catch (BadRequestException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+  }
+
+  @GetMapping
+  public List<Seller> getAll() {
+    return sellerService.getAll();
+  }
+
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @PutMapping(path = "{seller_id}")
+  public ResponseEntity<Seller> update(
+      @PathVariable("seller_id") Long sellerId,
+      @RequestBody Seller seller) {
+    try {
+      return ResponseEntity.ok(sellerService.update(sellerId, seller));
+    } catch (EntityNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  @DeleteMapping(path = "{seller_id}")
+  public ResponseEntity<String> delete(@PathVariable("seller_id") Long sellerId) {
+    try {
+      sellerService.delete(sellerId);
+      return ResponseEntity.ok("Deleted seller");
+    } catch (EntityNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+  }
+}
