@@ -76,6 +76,10 @@ public class AddressService {
     addressRepo.delete(address);
   }
 
+  public void deleteAllAtAccount(Account account) {
+    addressRepo.deleteAllAtAccount(account);
+  }
+
   public Address getFavorite(Long accountId) throws EntityNotFoundException {
     return addressRepo
         .findFavoriteAddressByAccount(accountService.findById(accountId))

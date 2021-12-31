@@ -38,8 +38,8 @@ public class CategoryController {
   }
 
   @GetMapping
-  public List<Category> getAll() {
-    return categoryService.getAll();
+  public ResponseEntity<List<Category>> getAll() {
+    return ResponseEntity.ok().body(categoryService.getAll());
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -59,7 +59,7 @@ public class CategoryController {
   public ResponseEntity<String> delete(@PathVariable("category_id") Long categoryId) {
     try {
       categoryService.delete(categoryId);
-      return ResponseEntity.ok("Deleted payment type");
+      return ResponseEntity.ok("Deleted category");
     } catch (EntityNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }

@@ -45,8 +45,14 @@ public class AccountService implements UserDetailsService {
     return accountRepo
         .findById(account_id)
         .orElseThrow(
-            () ->
-                new EntityNotFoundException(String.format(ACCOUNT_NOT_FOUND.label, account_id)));
+            () -> new EntityNotFoundException(String.format(ACCOUNT_NOT_FOUND.label, account_id)));
+  }
+
+  public Account findByUsername(String username) throws EntityNotFoundException {
+    return accountRepo
+        .findAccountByUsername(username)
+        .orElseThrow(
+            () -> new EntityNotFoundException(String.format(ACCOUNT_NOT_FOUND.label, username)));
   }
 
   public List<Account> getAll() {
@@ -56,8 +62,8 @@ public class AccountService implements UserDetailsService {
   public String create(Account account) throws BadRequestException, UsernameTakenException {
     if (account.getPassword() == null
         || account.getUsername() == null
-        || account.getLast_name() == null
-        || account.getFirst_name() == null)
+        || account.getLastName() == null
+        || account.getFirstName() == null)
       throw new BadRequestException(ExceptionResponses.NULL_VALUES.label);
     if (accountRepo.checkIfUsernameExists(account.getUsername()))
       throw new UsernameTakenException(
@@ -100,11 +106,11 @@ public class AccountService implements UserDetailsService {
     if (accountDetails.getPassword() != null)
       account.setPassword(passwordEncoder.encode(accountDetails.getPassword()));
     if (accountDetails.getFirst_name() != null
-        && !accountDetails.getFirst_name().equals(account.getFirst_name()))
-      account.setFirst_name(accountDetails.getFirst_name());
+        && !accountDetails.getFirst_name().equals(account.getFirstName()))
+      account.setFirstName(accountDetails.getFirst_name());
     if (accountDetails.getFirst_name() != null
-        && !accountDetails.getLast_name().equals(account.getLast_name()))
-      account.setLast_name(accountDetails.getLast_name());
+        && !accountDetails.getLast_name().equals(account.getLastName()))
+      account.setLastName(accountDetails.getLast_name());
     return account;
   }
 

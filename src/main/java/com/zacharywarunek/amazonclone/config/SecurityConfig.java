@@ -52,7 +52,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .disable()
         .authorizeRequests()
         .antMatchers(
-            "/api/v*/registration/**", "/api/v*/authenticate/**", "/api/v*/apiTest", "/v3/api-docs")
+            "/api/v*/registration/**",
+            "/api/v*/authenticate/**",
+            "/api/v*/apiTest",
+            "/v3/api-docs",
+            "/api/v*/categories")
         .permitAll()
         .anyRequest()
         .authenticated()

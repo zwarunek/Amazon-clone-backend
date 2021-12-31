@@ -1,6 +1,7 @@
 package com.zacharywarunek.amazonclone.product;
 
 import com.zacharywarunek.amazonclone.category.Category;
+import com.zacharywarunek.amazonclone.seller.Seller;
 import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,8 +35,9 @@ public class Product {
   @Column(name = "description", nullable = false)
   private String description;
 
-  @Column(name = "seller", nullable = false)
-  private String seller;
+  @ManyToOne
+  @JoinColumn(name = "seller_id")
+  private Seller seller;
 
   @Column(name = "price", nullable = false, precision = 18, scale = 2)
   private BigDecimal price;
@@ -82,11 +84,11 @@ public class Product {
     this.price = price;
   }
 
-  public String getSeller() {
+  public Seller getSeller() {
     return seller;
   }
 
-  public void setSeller(String seller) {
+  public void setSeller(Seller seller) {
     this.seller = seller;
   }
 
@@ -114,12 +116,12 @@ public class Product {
     this.id = id;
   }
 
-  public Product(String name, String description, String seller, BigDecimal price,
+  public Product(String name, String description, Seller seller, double price,
       Boolean primeEligible, Integer stock, Category category) {
     this.name = name;
     this.description = description;
     this.seller = seller;
-    this.price = price;
+    this.price = BigDecimal.valueOf(price);
     this.primeEligible = primeEligible;
     this.stock = stock;
     this.category = category;

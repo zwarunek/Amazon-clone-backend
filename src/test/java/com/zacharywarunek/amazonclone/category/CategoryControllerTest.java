@@ -143,7 +143,7 @@ class CategoryControllerTest {
             delete("/api/v1/categories/1"))
         .andExpect(status().isOk())
         .andExpect(
-            content().string("Deleted payment type"))
+            content().string("Deleted category"))
         .andReturn()
         .getResponse();
   }

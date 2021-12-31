@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import com.zacharywarunek.amazonclone.exceptions.BadRequestException;
 import com.zacharywarunek.amazonclone.exceptions.EntityNotFoundException;
 import com.zacharywarunek.amazonclone.exceptions.ExceptionResponses;
-import com.zacharywarunek.amazonclone.payment.paymenttype.PaymentType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -25,10 +24,8 @@ import org.springframework.data.domain.Sort;
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 
-  @Mock
-  CategoryRepo categoryRepo;
-  @InjectMocks
-  CategoryService categoryService;
+  @Mock CategoryRepo categoryRepo;
+  @InjectMocks CategoryService categoryService;
   private Category category;
 
   @BeforeEach
@@ -54,8 +51,7 @@ class CategoryServiceTest {
     given(categoryRepo.findById(any())).willReturn(Optional.empty());
     assertThatThrownBy(() -> categoryService.findById(any()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(
-            String.format(ExceptionResponses.CATEGORY_NOT_FOUND.label, category.getId()));
+        .hasMessage(String.format(ExceptionResponses.CATEGORY_NOT_FOUND.label, category.getId()));
   }
 
   @Test
@@ -77,8 +73,7 @@ class CategoryServiceTest {
     Category categoryDetails = new Category("ChangedName");
     category.setId(1L);
     given(categoryRepo.findById(category.getId())).willReturn(Optional.of(category));
-    Category categoryUpdated =
-        categoryService.update(category.getId(), categoryDetails);
+    Category categoryUpdated = categoryService.update(category.getId(), categoryDetails);
     categoryDetails.setId(category.getId());
     assertThat(categoryUpdated).usingRecursiveComparison().isEqualTo(categoryDetails);
   }
@@ -89,8 +84,7 @@ class CategoryServiceTest {
     given(categoryRepo.findById(category.getId())).willReturn(Optional.empty());
     assertThatThrownBy(() -> categoryService.update(category.getId(), any()))
         .isInstanceOf(EntityNotFoundException.class)
-        .hasMessage(
-            String.format(ExceptionResponses.CATEGORY_NOT_FOUND.label, category.getId()));
+        .hasMessage(String.format(ExceptionResponses.CATEGORY_NOT_FOUND.label, category.getId()));
   }
 
   @Test
